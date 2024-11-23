@@ -1,4 +1,4 @@
-package com.dodam.dicegame.dicegame;
+package com.dodam.dicegame.dicegame.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,8 +17,14 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String roomName;
 
     private int maxPlayers;
+
+    private int targetNumber;
+
+    private int diceCount;
+
+    private String password;
 
 }
