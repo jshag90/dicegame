@@ -1,4 +1,4 @@
-package com.dodam.dicegame.dicegame;
+package com.dodam.dicegame.dicegame.controller;
 
 import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
