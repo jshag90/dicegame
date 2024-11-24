@@ -13,4 +13,5 @@ public class RoomInfoVO {
     int maxPlayers;
     int targetNumber;
     int diceCount;
+    String entryCode;
 }
