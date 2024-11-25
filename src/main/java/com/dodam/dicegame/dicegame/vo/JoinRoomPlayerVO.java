@@ -8,12 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @ToString
-public class RoomInfoVO {
-    String roomName;
-    int maxPlayers;
-    int targetNumber;
-    int diceCount;
-    String roomType;
+public class JoinRoomPlayerVO {
+    Long roomId;
     String entryCode;
     String nickName;
 }

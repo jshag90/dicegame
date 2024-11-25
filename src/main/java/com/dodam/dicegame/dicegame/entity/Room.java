@@ -25,6 +25,8 @@ public class Room {
 
     private int diceCount;
 
+    private String roomType;
+
     private String entryCode;
 
 }

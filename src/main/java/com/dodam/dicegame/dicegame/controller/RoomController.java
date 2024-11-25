@@ -1,7 +1,7 @@
 package com.dodam.dicegame.dicegame.controller;
 
-import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.service.RoomService;
+import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
 import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,5 +24,12 @@ public class RoomController {
     public ResponseEntity<Long> createRoom(@RequestBody RoomInfoVO roomInfoVO) {
         Long roomId = roomService.createRoom(roomInfoVO);
         return ResponseEntity.ok(roomId);
+    }
+
+    @PostMapping("/join")
+    @Operation(summary = "방에 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
+    public ResponseEntity<Long> joinRoomPlayer(@RequestBody JoinRoomPlayerVO joinRoomPlayerVO) {
+        Long playerId = roomService.joinRoomPlayer(joinRoomPlayerVO);
+        return ResponseEntity.ok(playerId);
     }
 }

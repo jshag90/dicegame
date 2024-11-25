@@ -17,6 +17,8 @@ public class Player {
 
     private String nickName;
 
+    private String isManager;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id") // 외래 키 이름 지정
     private Room room;
