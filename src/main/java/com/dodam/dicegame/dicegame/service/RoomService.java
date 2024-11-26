@@ -9,6 +9,7 @@ import com.dodam.dicegame.dicegame.repository.RoomRepository;
 import com.dodam.dicegame.dicegame.util.RoomManager;
 import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
 import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
+import com.dodam.dicegame.dicegame.vo.RoomSettingInfoVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -70,5 +71,22 @@ public class RoomService {
     public void removeRoom(Long roomId) {
         Optional<Room> findRoom = roomRepository.findById(roomId);
         findRoom.ifPresent(roomRepository::delete);
+    }
+
+    public RoomSettingInfoVO getRoomSettingInfo(Long roomId) throws NoExistRoomException {
+        Optional<Room> findRoom = roomRepository.findById(roomId);
+
+        if (!findRoom.isPresent()) {
+            throw new NoExistRoomException("올바른 방 정보가 아님");
+        }
+
+
+        Room getRoom = findRoom.get();
+        return RoomSettingInfoVO.builder().roomType(getRoom.getRoomType())
+                .diceCount(getRoom.getDiceCount())
+                .maxPlayers(getRoom.getMaxPlayers())
+                .roomName(getRoom.getRoomName())
+                .targetNumber(getRoom.getTargetNumber())
+                .build();
     }
 }

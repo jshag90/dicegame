@@ -5,6 +5,7 @@ import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.service.RoomService;
 import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
 import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
+import com.dodam.dicegame.dicegame.vo.RoomSettingInfoVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +41,11 @@ public class RoomController {
     public ResponseEntity<Void> removeRoom(@PathVariable("roomId") Long roomId){
         roomService.removeRoom(roomId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/info/room_id={roomId}")
+    @Operation(summary = "방 설정 정보", description = "방 설정 정보를 가져옵니다.")
+    public ResponseEntity<RoomSettingInfoVO> getRoomInfo(@PathVariable("roomId") Long roomId) throws NoExistRoomException {
+        return ResponseEntity.ok(roomService.getRoomSettingInfo(roomId));
     }
 }
