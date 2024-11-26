@@ -1,5 +1,6 @@
 package com.dodam.dicegame.dicegame.vo;
 
+import com.dodam.dicegame.dicegame.util.RoomType;
 import lombok.*;
 
 @Getter
@@ -13,7 +14,7 @@ public class RoomInfoVO {
     int maxPlayers;
     int targetNumber;
     int diceCount;
-    String roomType;
+    RoomType roomType;
     String entryCode;
     String nickName;
 }

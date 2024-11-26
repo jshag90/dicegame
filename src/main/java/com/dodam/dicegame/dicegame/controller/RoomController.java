@@ -1,5 +1,7 @@
 package com.dodam.dicegame.dicegame.controller;
 
+import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
+import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.service.RoomService;
 import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
 import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
@@ -28,8 +30,15 @@ public class RoomController {
 
     @PostMapping("/join")
     @Operation(summary = "방에 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
-    public ResponseEntity<Long> joinRoomPlayer(@RequestBody JoinRoomPlayerVO joinRoomPlayerVO) {
+    public ResponseEntity<Long> joinRoomPlayer(@RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
         Long playerId = roomService.joinRoomPlayer(joinRoomPlayerVO);
         return ResponseEntity.ok(playerId);
+    }
+
+    @GetMapping("/remove/room_id={roomId}")
+    @Operation(summary = "방 제거하기", description = "게임이 종료되면 방을 제거합니다.")
+    public ResponseEntity<Void> removeRoom(@PathVariable("roomId") Long roomId){
+        roomService.removeRoom(roomId);
+        return ResponseEntity.ok().build();
     }
 }

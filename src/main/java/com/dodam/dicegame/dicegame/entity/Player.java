@@ -19,7 +19,8 @@ public class Player {
 
     private String isManager;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id") // 외래 키 이름 지정
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "room_id")
     private Room room;
+
 }
