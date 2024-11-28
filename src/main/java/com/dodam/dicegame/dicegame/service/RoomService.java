@@ -24,7 +24,7 @@ public class RoomService {
     private final PlayerRepository playerRepository;
 
     public Long createRoom(RoomInfoVO roomInfoVO) {
-        Room saveRoom = roomRepository.save(Room.builder().roomName(roomInfoVO.getRoomName())
+        Room saveRoom = roomRepository.save(Room.builder()
                 .diceCount(roomInfoVO.getDiceCount())
                 .maxPlayers(roomInfoVO.getMaxPlayers())
                 .targetNumber(roomInfoVO.getTargetNumber())
@@ -85,7 +85,6 @@ public class RoomService {
         return RoomSettingInfoVO.builder().roomType(getRoom.getRoomType())
                 .diceCount(getRoom.getDiceCount())
                 .maxPlayers(getRoom.getMaxPlayers())
-                .roomName(getRoom.getRoomName())
                 .targetNumber(getRoom.getTargetNumber())
                 .build();
     }

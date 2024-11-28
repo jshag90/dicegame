@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/room")
 @Slf4j
 @Tag(name = "Room API", description = "방(Room) 관련 API")
+@CrossOrigin(origins = "*", maxAge = 3600) // 모든 출처 허용, 캐시 시간 설정
 @RequiredArgsConstructor
 public class RoomController {
 

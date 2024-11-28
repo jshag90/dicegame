@@ -10,7 +10,6 @@ import lombok.*;
 @Builder
 @ToString
 public class RoomInfoVO {
-    String roomName;
     int maxPlayers;
     int targetNumber;
     int diceCount;
