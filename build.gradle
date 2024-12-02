@@ -40,3 +40,8 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// Set the output WAR file name to "dicegame.war"
+tasks.named('war') {
+	archiveFileName.set('dicegame.war')
+}
