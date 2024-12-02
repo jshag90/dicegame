@@ -3,7 +3,9 @@ package com.dodam.dicegame.dicegame.controller;
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
 import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.service.RoomService;
+import com.dodam.dicegame.dicegame.util.ReturnCode;
 import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
+import com.dodam.dicegame.dicegame.vo.ReturnCodeVO;
 import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
 import com.dodam.dicegame.dicegame.vo.RoomSettingInfoVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,28 +27,39 @@ public class RoomController {
 
     @PostMapping("/create")
     @Operation(summary = "방 생성", description = "방생성 정보를 저장합니다.")
-    public ResponseEntity<Long> createRoom(@RequestBody RoomInfoVO roomInfoVO) {
+    public ResponseEntity<ReturnCodeVO<Long>> createRoom(@RequestBody RoomInfoVO roomInfoVO) {
         Long roomId = roomService.createRoom(roomInfoVO);
-        return ResponseEntity.ok(roomId);
+        return ResponseEntity.ok(ReturnCodeVO.<Long>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(roomId)
+                .build());
     }
 
     @PostMapping("/join")
     @Operation(summary = "방에 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
-    public ResponseEntity<Long> joinRoomPlayer(@RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
+    public ResponseEntity<ReturnCodeVO<Long>> joinRoomPlayer(@RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
         Long playerId = roomService.joinRoomPlayer(joinRoomPlayerVO);
-        return ResponseEntity.ok(playerId);
+        return ResponseEntity.ok(ReturnCodeVO.<Long>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(playerId)
+                .build());
     }
 
     @GetMapping("/remove/room_id={roomId}")
     @Operation(summary = "방 제거하기", description = "게임이 종료되면 방을 제거합니다.")
-    public ResponseEntity<Void> removeRoom(@PathVariable("roomId") Long roomId){
+    public ResponseEntity<ReturnCodeVO<Void>> removeRoom(@PathVariable("roomId") Long roomId) {
         roomService.removeRoom(roomId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ReturnCodeVO.<Void>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .build());
     }
 
     @GetMapping("/info/room_id={roomId}")
     @Operation(summary = "방 설정 정보", description = "방 설정 정보를 가져옵니다.")
-    public ResponseEntity<RoomSettingInfoVO> getRoomInfo(@PathVariable("roomId") Long roomId) throws NoExistRoomException {
-        return ResponseEntity.ok(roomService.getRoomSettingInfo(roomId));
+    public ResponseEntity<ReturnCodeVO<RoomSettingInfoVO>> getRoomInfo(@PathVariable("roomId") Long roomId) throws NoExistRoomException {
+        return ResponseEntity.ok(ReturnCodeVO.<RoomSettingInfoVO>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(roomService.getRoomSettingInfo(roomId))
+                .build());
     }
 }

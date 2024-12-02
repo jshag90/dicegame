@@ -8,6 +8,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public enum ReturnCode {
+    SUCCESS(0),
     NO_EXIST_ROOM(-2),
     TOO_MANY_PLAYER(-3);
 

@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ReturnCodeVO {
+public class ReturnCodeVO<T> {
     Integer returnCode;
+    T data;
 }
