@@ -77,6 +77,10 @@ public class RoomService {
             return Long.valueOf(ReturnCode.ALREADY_USED_NICK_NAME.getValue());
         }
 
+        if(playerRepository.countByRoom(findPublicRoom) >= findPublicRoom.getMaxPlayers()) {
+            return Long.valueOf(ReturnCode.TOO_MANY_PLAYER.getValue());
+        }
+
         Player joinPlayer = playerRepository.save(Player.builder()
                 .nickName(nickName)
                 .room(findPublicRoom)
