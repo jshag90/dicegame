@@ -35,13 +35,23 @@ public class RoomController {
                 .build());
     }
 
-    @PostMapping("/join")
-    @Operation(summary = "방에 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
-    public ResponseEntity<ReturnCodeVO<Long>> joinRoomPlayer(@RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
-        Long playerId = roomService.joinRoomPlayer(joinRoomPlayerVO);
+    @PostMapping("/secret/join")
+    @Operation(summary = "비공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
+    public ResponseEntity<ReturnCodeVO<Long>> joinRoomPlayer(
+            @RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
+        Long playerId = roomService.joinSecretRoomPlayer(joinRoomPlayerVO);
         return ResponseEntity.ok(ReturnCodeVO.<Long>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())
                 .data(playerId)
+                .build());
+    }
+
+    @GetMapping("/public/join/nick_name={nickName}")
+    @Operation(summary = "공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
+    public ResponseEntity<ReturnCodeVO<Long>> joinPublicRoomPlayer(@PathVariable("nickName") String nickName) {
+        return ResponseEntity.ok(ReturnCodeVO.<Long>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(roomService.joinPublicRoomPlayer(nickName))
                 .build());
     }
 

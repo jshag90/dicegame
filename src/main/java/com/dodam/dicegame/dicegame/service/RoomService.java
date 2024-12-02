@@ -6,7 +6,9 @@ import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
 import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.repository.PlayerRepository;
 import com.dodam.dicegame.dicegame.repository.RoomRepository;
+import com.dodam.dicegame.dicegame.util.ReturnCode;
 import com.dodam.dicegame.dicegame.util.RoomManager;
+import com.dodam.dicegame.dicegame.util.RoomType;
 import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
 import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
 import com.dodam.dicegame.dicegame.vo.RoomSettingInfoVO;
@@ -41,7 +43,7 @@ public class RoomService {
         return saveRoom.getId();
     }
 
-    public Long joinRoomPlayer(JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
+    public Long joinSecretRoomPlayer(JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
 
         Optional<Room> joinRoom = roomRepository.findByIdAndEntryCode(joinRoomPlayerVO.getRoomId(), joinRoomPlayerVO.getEntryCode());
 
@@ -58,6 +60,26 @@ public class RoomService {
         Player joinPlayer = playerRepository.save(Player.builder()
                 .nickName(joinRoomPlayerVO.getNickName())
                 .room(findRoom)
+                .isManager(RoomManager.NORMAL.getValue())
+                .build());
+
+        return joinPlayer.getId();
+    }
+
+    public Long joinPublicRoomPlayer(String nickName){
+        if(!roomRepository.findFirstByRoomTypeOrderByIdDesc(RoomType.PUBLIC.getValue()).isPresent()){
+            return Long.valueOf(ReturnCode.NO_EXIST_PUBLIC_ROOM.getValue());
+        }
+
+        Room findPublicRoom = roomRepository.findFirstByRoomTypeOrderByIdDesc(RoomType.PUBLIC.getValue()).get();
+
+        if(playerRepository.isNickNameDuplicate(findPublicRoom, nickName)){
+            return Long.valueOf(ReturnCode.ALREADY_USED_NICK_NAME.getValue());
+        }
+
+        Player joinPlayer = playerRepository.save(Player.builder()
+                .nickName(nickName)
+                .room(findPublicRoom)
                 .isManager(RoomManager.NORMAL.getValue())
                 .build());
 

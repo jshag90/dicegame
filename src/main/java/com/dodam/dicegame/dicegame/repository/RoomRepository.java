@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
     Optional<Room> findByIdAndEntryCode(Long roomId, String entryCode);
+
+    Optional<Room> findFirstByRoomTypeOrderByIdDesc(String roomType);
 }
