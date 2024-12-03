@@ -4,10 +4,10 @@ import com.dodam.dicegame.dicegame.dto.RoomPlayerInfo;
 import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
+import com.dodam.dicegame.dicegame.exception.SameNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.repository.PlayerRepository;
 import com.dodam.dicegame.dicegame.repository.RoomRepository;
-import com.dodam.dicegame.dicegame.util.ReturnCode;
 import com.dodam.dicegame.dicegame.util.RoomManager;
 import com.dodam.dicegame.dicegame.util.RoomType;
 import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
@@ -47,53 +47,41 @@ public class RoomService {
         return saveRoom.getId();
     }
 
-    public Long joinSecretRoomPlayer(JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
+    public Long joinSecretRoomPlayer(JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
+        Room findRoom = roomRepository.findByIdAndEntryCode(joinRoomPlayerVO.getRoomId(), joinRoomPlayerVO.getEntryCode())
+                .orElseThrow(() -> new NoExistRoomException("올바른 방 정보가 아님"));
 
-        Optional<Room> joinRoom = roomRepository.findByIdAndEntryCode(joinRoomPlayerVO.getRoomId(), joinRoomPlayerVO.getEntryCode());
-
-        if (!joinRoom.isPresent()) {
-            throw new NoExistRoomException("올바른 방 정보가 아님");
+        if (playerRepository.isNickNameDuplicate(findRoom, joinRoomPlayerVO.getNickName())) {
+            throw new SameNickNamePlayerException("찾은방에 이미 동일한 닉네임의 사용자가 존재");
         }
-
-        Room findRoom = joinRoom.get();
 
         if (playerRepository.countByRoom(findRoom) >= findRoom.getMaxPlayers()) {
             throw new TooManyPlayerException("설정된 사용자 인원보다 많이 등록 할 수 없습니다.");
         }
 
-        Player joinPlayer = playerRepository.save(Player.builder()
-                .nickName(joinRoomPlayerVO.getNickName())
-                .room(findRoom)
-                .isManager(RoomManager.NORMAL.getValue())
-                .build());
-
-        return joinPlayer.getId();
+        return findRoom.getId();
     }
+
+
 
     /**
      * 예외 정책에 통과하면 찾은 방번호 return
      * @param nickName
      * @return
      */
-    public Long checkJoinPublicRoomPlayer(String nickName) {
+    public Long checkJoinPublicRoomPlayer(String nickName) throws NoExistRoomException, SameNickNamePlayerException {
 
         Room findPublicRoom = roomRepository.findAvailableMaxPlayerPublicRoom(RoomType.PUBLIC.getValue(), PageRequest.of(0, 1))
-                                            .orElse(null);
-        if (findPublicRoom == null) {
-            log.info("공개방이 존재하지 않습니다.");
-            return Long.valueOf(ReturnCode.NO_EXIST_PUBLIC_ROOM.getValue());
-        }
+                                            .orElseThrow(() -> new NoExistRoomException("공개방이 존재하지 않습니다."));
 
-        log.info("findPublicRoom : "+findPublicRoom);
         if (playerRepository.isNickNameDuplicate(findPublicRoom, nickName)) {
-            log.info("찾은방에 이미 동일한 닉네임의 사용자가 존재");
-            return Long.valueOf(ReturnCode.ALREADY_USED_NICK_NAME.getValue());
+            throw new SameNickNamePlayerException("찾은방에 이미 동일한 닉네임의 사용자가 존재");
         }
 
         return findPublicRoom.getId();
     }
 
-    public RoomPlayerInfo handleJoinPublicRoomPlayer(Long roomId, String nickName) {
+    public RoomPlayerInfo handleJoinRoomPlayer(Long roomId, String nickName) {
 
         Room findPublicRoom = roomRepository.findById(roomId).get();
 

@@ -2,6 +2,7 @@ package com.dodam.dicegame.dicegame.controller;
 
 import com.dodam.dicegame.dicegame.dto.RoomPlayerInfo;
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
+import com.dodam.dicegame.dicegame.exception.SameNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.service.RoomService;
 import com.dodam.dicegame.dicegame.util.ReturnCode;
@@ -38,28 +39,23 @@ public class RoomController {
 
     @PostMapping("/secret/join")
     @Operation(summary = "비공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
-    public ResponseEntity<ReturnCodeVO<Long>> joinRoomPlayer(
-            @RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException {
-        Long playerId = roomService.joinSecretRoomPlayer(joinRoomPlayerVO);
-        return ResponseEntity.ok(ReturnCodeVO.<Long>builder()
-                .returnCode(ReturnCode.SUCCESS.getValue())
-                .data(playerId)
+    public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinSecretRoomPlayer(
+            @RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
+        Long findRoomId = roomService.joinSecretRoomPlayer(joinRoomPlayerVO);
+        return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
+                .returnCode(findRoomId.intValue())
+                .data(roomService.handleJoinRoomPlayer(findRoomId, joinRoomPlayerVO.getNickName()))
                 .build());
     }
 
     @GetMapping("/public/join/nick_name={nickName}")
     @Operation(summary = "공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
-    public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinPublicRoomPlayer(@PathVariable("nickName") String nickName) {
-        int returnCode = roomService.checkJoinPublicRoomPlayer(nickName).intValue();
-        if (returnCode < 0) {
-            return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder().returnCode(returnCode).build());
-        }
-
-        RoomPlayerInfo roomPlayerInfo = roomService.handleJoinPublicRoomPlayer(Long.valueOf(returnCode), nickName);
+    public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinPublicRoomPlayer(@PathVariable("nickName") String nickName) throws NoExistRoomException, SameNickNamePlayerException {
+        Long findRoomId = roomService.checkJoinPublicRoomPlayer(nickName);
         return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
-                            .returnCode(returnCode)
-                            .data(roomPlayerInfo)
-                            .build());
+                .returnCode(findRoomId.intValue())
+                .data(roomService.handleJoinRoomPlayer(findRoomId, nickName))
+                .build());
     }
 
     @GetMapping("/remove/room_id={roomId}")

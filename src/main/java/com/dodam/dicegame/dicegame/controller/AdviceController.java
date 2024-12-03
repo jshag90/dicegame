@@ -1,13 +1,13 @@
 package com.dodam.dicegame.dicegame.controller;
 
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
+import com.dodam.dicegame.dicegame.exception.SameNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.util.ReturnCode;
 import com.dodam.dicegame.dicegame.vo.ReturnCodeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,6 +26,12 @@ public class AdviceController {
     public ResponseEntity<ReturnCodeVO> handleTooManyPlayerException(TooManyPlayerException tmp) {
         log.info(tmp.getMessage());
         return new ResponseEntity<>(ReturnCodeVO.builder().returnCode(ReturnCode.TOO_MANY_PLAYER.getValue()).build(), HttpStatus.OK);
+    }
+
+    @ExceptionHandler(SameNickNamePlayerException.class)
+    public ResponseEntity<ReturnCodeVO> handleSameNickNameException(SameNickNamePlayerException sameNickNamePlayerException) {
+        log.info(sameNickNamePlayerException.getMessage());
+        return new ResponseEntity<>(ReturnCodeVO.builder().returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue()).build(), HttpStatus.OK);
     }
 
 
