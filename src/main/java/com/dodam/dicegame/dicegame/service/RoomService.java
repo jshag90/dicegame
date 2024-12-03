@@ -93,6 +93,9 @@ public class RoomService {
         return RoomPlayerInfo.builder().targetNumber(findPublicRoom.getTargetNumber())
                 .diceCount(findPublicRoom.getDiceCount())
                 .playerId(joinPlayer.getId())
+                .nickName(joinPlayer.getNickName())
+                .roomId(findPublicRoom.getId())
+                .maxPlayer(findPublicRoom.getMaxPlayers())
                 .build();
     }
 
