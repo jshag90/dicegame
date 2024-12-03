@@ -69,17 +69,16 @@ public class RoomService {
      * @param nickName
      * @return
      */
-    public Long checkJoinPublicRoomPlayer(String nickName) throws NoExistRoomException, SameNickNamePlayerException {
+    public Room checkJoinPublicRoomPlayer(String nickName) throws NoExistRoomException, SameNickNamePlayerException {
 
-        Room findPublicRoom = roomRepository.findAvailableMaxPlayerPublicRoom(RoomType.PUBLIC.getValue(), PageRequest.of(0, 1))
-                                            .orElseThrow(() -> new NoExistRoomException("공개방이 존재하지 않습니다."));
-
-        if (playerRepository.isNickNameDuplicate(findPublicRoom, nickName)) {
-            throw new SameNickNamePlayerException("찾은방에 이미 동일한 닉네임의 사용자가 존재");
-        }
-
-        return findPublicRoom.getId();
+        return roomRepository.findAvailableMaxPlayerPublicRoom(RoomType.PUBLIC.getValue(), PageRequest.of(0, 1))
+                .orElseThrow(() -> new NoExistRoomException("공개방이 존재하지 않습니다."));
     }
+
+    public boolean isAlreadyUsedNickName(Room findPublicRoom, String nickName) {
+        return playerRepository.isNickNameDuplicate(findPublicRoom, nickName);
+    }
+
 
     public RoomPlayerInfo handleJoinRoomPlayer(Long roomId, String nickName) {
 

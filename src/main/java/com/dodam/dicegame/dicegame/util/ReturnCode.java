@@ -12,7 +12,8 @@ public enum ReturnCode {
     NO_EXIST_ROOM(-2),
     TOO_MANY_PLAYER(-3),
     NO_EXIST_PUBLIC_ROOM(-4),
-    ALREADY_USED_NICK_NAME(-5)
+    ALREADY_USED_NICK_NAME(-5),
+    SAME_ALREADY_USED_NICK_NAME(-6)
     ;
 
     private final Integer value;

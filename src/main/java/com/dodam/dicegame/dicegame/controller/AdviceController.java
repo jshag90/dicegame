@@ -1,6 +1,7 @@
 package com.dodam.dicegame.dicegame.controller;
 
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
+import com.dodam.dicegame.dicegame.exception.SameAlreadyNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.SameNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.util.ReturnCode;
@@ -32,6 +33,12 @@ public class AdviceController {
     public ResponseEntity<ReturnCodeVO> handleSameNickNameException(SameNickNamePlayerException sameNickNamePlayerException) {
         log.info(sameNickNamePlayerException.getMessage());
         return new ResponseEntity<>(ReturnCodeVO.builder().returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue()).build(), HttpStatus.OK);
+    }
+
+    @ExceptionHandler(SameAlreadyNickNamePlayerException.class)
+    public ResponseEntity<ReturnCodeVO> handleSameAlreadyNickNameException(SameAlreadyNickNamePlayerException sameAlreadyNickNamePlayerException) {
+        log.info(sameAlreadyNickNamePlayerException.getMessage());
+        return new ResponseEntity<>(ReturnCodeVO.builder().returnCode(ReturnCode.SAME_ALREADY_USED_NICK_NAME.getValue()).build(), HttpStatus.OK);
     }
 
 

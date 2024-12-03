@@ -1,6 +1,7 @@
 package com.dodam.dicegame.dicegame.controller;
 
 import com.dodam.dicegame.dicegame.dto.RoomPlayerInfo;
+import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
 import com.dodam.dicegame.dicegame.exception.SameNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
@@ -51,10 +52,17 @@ public class RoomController {
     @GetMapping("/public/join/nick_name={nickName}")
     @Operation(summary = "공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
     public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinPublicRoomPlayer(@PathVariable("nickName") String nickName) throws NoExistRoomException, SameNickNamePlayerException {
-        Long findRoomId = roomService.checkJoinPublicRoomPlayer(nickName);
+        Room findRoom = roomService.checkJoinPublicRoomPlayer(nickName);
+        if (roomService.isAlreadyUsedNickName(findRoom, nickName)) {
+            return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
+                    .returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue())
+                    .data(roomService.handleJoinRoomPlayer(findRoom.getId(), nickName))
+                    .build());
+        }
+
         return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
-                .returnCode(findRoomId.intValue())
-                .data(roomService.handleJoinRoomPlayer(findRoomId, nickName))
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(roomService.handleJoinRoomPlayer(findRoom.getId(), nickName))
                 .build());
     }
 
