@@ -1,5 +1,6 @@
 package com.dodam.dicegame.dicegame.controller;
 
+import com.dodam.dicegame.dicegame.dto.RoomPlayerInfo;
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
 import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.service.RoomService;
@@ -48,11 +49,17 @@ public class RoomController {
 
     @GetMapping("/public/join/nick_name={nickName}")
     @Operation(summary = "공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
-    public ResponseEntity<ReturnCodeVO<Long>> joinPublicRoomPlayer(@PathVariable("nickName") String nickName) {
-        return ResponseEntity.ok(ReturnCodeVO.<Long>builder()
-                .returnCode(ReturnCode.SUCCESS.getValue())
-                .data(roomService.joinPublicRoomPlayer(nickName))
-                .build());
+    public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinPublicRoomPlayer(@PathVariable("nickName") String nickName) {
+        int returnCode = roomService.checkJoinPublicRoomPlayer(nickName).intValue();
+        if (returnCode < 0) {
+            return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder().returnCode(returnCode).build());
+        }
+
+        RoomPlayerInfo roomPlayerInfo = roomService.handleJoinPublicRoomPlayer(Long.valueOf(returnCode), nickName);
+        return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
+                            .returnCode(returnCode)
+                            .data(roomPlayerInfo)
+                            .build());
     }
 
     @GetMapping("/remove/room_id={roomId}")

@@ -1,5 +1,6 @@
 package com.dodam.dicegame.dicegame.service;
 
+import com.dodam.dicegame.dicegame.dto.RoomPlayerInfo;
 import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
@@ -13,12 +14,15 @@ import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
 import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
 import com.dodam.dicegame.dicegame.vo.RoomSettingInfoVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RoomService {
 
     private final RoomRepository roomRepository;
@@ -66,20 +70,32 @@ public class RoomService {
         return joinPlayer.getId();
     }
 
-    public Long joinPublicRoomPlayer(String nickName){
-        if(!roomRepository.findFirstByRoomTypeOrderByIdDesc(RoomType.PUBLIC.getValue()).isPresent()){
+    /**
+     * 예외 정책에 통과하면 찾은 방번호 return
+     * @param nickName
+     * @return
+     */
+    public Long checkJoinPublicRoomPlayer(String nickName) {
+
+        Room findPublicRoom = roomRepository.findAvailableMaxPlayerPublicRoom(RoomType.PUBLIC.getValue(), PageRequest.of(0, 1))
+                                            .orElse(null);
+        if (findPublicRoom == null) {
+            log.info("공개방이 존재하지 않습니다.");
             return Long.valueOf(ReturnCode.NO_EXIST_PUBLIC_ROOM.getValue());
         }
 
-        Room findPublicRoom = roomRepository.findFirstByRoomTypeOrderByIdDesc(RoomType.PUBLIC.getValue()).get();
-
-        if(playerRepository.isNickNameDuplicate(findPublicRoom, nickName)){
+        log.info("findPublicRoom : "+findPublicRoom);
+        if (playerRepository.isNickNameDuplicate(findPublicRoom, nickName)) {
+            log.info("찾은방에 이미 동일한 닉네임의 사용자가 존재");
             return Long.valueOf(ReturnCode.ALREADY_USED_NICK_NAME.getValue());
         }
 
-        if(playerRepository.countByRoom(findPublicRoom) >= findPublicRoom.getMaxPlayers()) {
-            return Long.valueOf(ReturnCode.TOO_MANY_PLAYER.getValue());
-        }
+        return findPublicRoom.getId();
+    }
+
+    public RoomPlayerInfo handleJoinPublicRoomPlayer(Long roomId, String nickName) {
+
+        Room findPublicRoom = roomRepository.findById(roomId).get();
 
         Player joinPlayer = playerRepository.save(Player.builder()
                 .nickName(nickName)
@@ -87,7 +103,10 @@ public class RoomService {
                 .isManager(RoomManager.NORMAL.getValue())
                 .build());
 
-        return joinPlayer.getId();
+        return RoomPlayerInfo.builder().targetNumber(findPublicRoom.getTargetNumber())
+                .diceCount(findPublicRoom.getDiceCount())
+                .playerId(joinPlayer.getId())
+                .build();
     }
 
     /**
