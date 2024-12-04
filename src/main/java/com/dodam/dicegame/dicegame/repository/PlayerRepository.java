@@ -12,6 +12,9 @@ import org.springframework.stereotype.Repository;
 public interface PlayerRepository extends JpaRepository<Player, Long> {
     long countByRoom(Room room);
 
+    @Query("SELECT p.room FROM Player p WHERE p.id = :playerId")
+    Room findRoomByPlayerId(@Param("playerId") Long playerId);
+
     @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room = :room AND p.nickName = :nickName")
     boolean isNickNameDuplicate(@Param("room") Room room, @Param("nickName") String nickName);
 
