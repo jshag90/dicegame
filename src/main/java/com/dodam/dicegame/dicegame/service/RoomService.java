@@ -47,7 +47,7 @@ public class RoomService {
         return saveRoom.getId();
     }
 
-    public Room joinSecretRoomPlayer(JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
+    public Room checkSecretRoomPlayer(JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
         Room findRoom = roomRepository.findByIdAndEntryCode(joinRoomPlayerVO.getRoomId(), joinRoomPlayerVO.getEntryCode())
                 .orElseThrow(() -> new NoExistRoomException("올바른 방 정보가 아님"));
 
@@ -62,11 +62,9 @@ public class RoomService {
 
     /**
      * 예외 정책에 통과하면 찾은 방번호 return
-     * @param nickName
      * @return
      */
-    public Room checkJoinPublicRoomPlayer(String nickName) throws NoExistRoomException, SameNickNamePlayerException {
-
+    public Room checkJoinPublicRoomPlayer() throws NoExistRoomException {
         return roomRepository.findAvailableMaxPlayerPublicRoom(RoomType.PUBLIC.getValue(), PageRequest.of(0, 1))
                 .orElseThrow(() -> new NoExistRoomException("공개방이 존재하지 않습니다."));
     }

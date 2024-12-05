@@ -42,7 +42,7 @@ public class RoomController {
     @Operation(summary = "비공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
     public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinSecretRoomPlayer(
             @RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
-        Room findRoom = roomService.joinSecretRoomPlayer(joinRoomPlayerVO);
+        Room findRoom = roomService.checkSecretRoomPlayer(joinRoomPlayerVO);
         if (roomService.isAlreadyUsedNickName(findRoom, joinRoomPlayerVO.getNickName())) {
             return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
                     .returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue())
@@ -56,10 +56,10 @@ public class RoomController {
                 .build());
     }
 
-    @GetMapping("/public/join/nick_name={nickName}")
+    @GetMapping("/public/join/nick-name={nickName}")
     @Operation(summary = "공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
     public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinPublicRoomPlayer(@PathVariable("nickName") String nickName) throws NoExistRoomException, SameNickNamePlayerException {
-        Room findRoom = roomService.checkJoinPublicRoomPlayer(nickName);
+        Room findRoom = roomService.checkJoinPublicRoomPlayer();
         if (roomService.isAlreadyUsedNickName(findRoom, nickName)) {
             return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
                     .returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue())
