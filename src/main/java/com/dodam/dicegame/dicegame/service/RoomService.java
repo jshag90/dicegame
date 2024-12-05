@@ -47,19 +47,15 @@ public class RoomService {
         return saveRoom.getId();
     }
 
-    public Long joinSecretRoomPlayer(JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
+    public Room joinSecretRoomPlayer(JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
         Room findRoom = roomRepository.findByIdAndEntryCode(joinRoomPlayerVO.getRoomId(), joinRoomPlayerVO.getEntryCode())
                 .orElseThrow(() -> new NoExistRoomException("올바른 방 정보가 아님"));
-
-        if (playerRepository.isNickNameDuplicate(findRoom, joinRoomPlayerVO.getNickName())) {
-            throw new SameNickNamePlayerException("찾은방에 이미 동일한 닉네임의 사용자가 존재");
-        }
 
         if (playerRepository.countByRoom(findRoom) >= findRoom.getMaxPlayers()) {
             throw new TooManyPlayerException("설정된 사용자 인원보다 많이 등록 할 수 없습니다.");
         }
 
-        return findRoom.getId();
+        return findRoom;
     }
 
 
@@ -82,21 +78,24 @@ public class RoomService {
 
     public RoomPlayerInfo handleJoinRoomPlayer(Long roomId, String nickName) {
 
-        Room findPublicRoom = roomRepository.findById(roomId).get();
+        Room findRoom = roomRepository.findById(roomId).get();
 
         Player joinPlayer = playerRepository.save(Player.builder()
                 .nickName(nickName)
-                .room(findPublicRoom)
+                .room(findRoom)
                 .isManager(RoomManager.NORMAL.getValue())
                 .build());
 
-        return RoomPlayerInfo.builder().targetNumber(findPublicRoom.getTargetNumber())
-                .diceCount(findPublicRoom.getDiceCount())
+        RoomPlayerInfo roomPlayerInfo = RoomPlayerInfo.builder().targetNumber(findRoom.getTargetNumber())
+                .diceCount(findRoom.getDiceCount())
                 .playerId(joinPlayer.getId())
                 .nickName(joinPlayer.getNickName())
-                .roomId(findPublicRoom.getId())
-                .maxPlayer(findPublicRoom.getMaxPlayers())
+                .roomId(findRoom.getId())
+                .maxPlayer(findRoom.getMaxPlayers())
+                .entryCode(findRoom.getEntryCode())
                 .build();
+        log.info(roomPlayerInfo.toString());
+        return roomPlayerInfo;
     }
 
     /**

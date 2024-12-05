@@ -29,15 +29,25 @@ public class AdviceController {
         return new ResponseEntity<>(ReturnCodeVO.builder().returnCode(ReturnCode.TOO_MANY_PLAYER.getValue()).build(), HttpStatus.OK);
     }
 
+    /**
+     * 해당 방에 동일한 닉네임 사용자가 있을때
+     * @param sameNickNamePlayerException
+     * @return
+     */
     @ExceptionHandler(SameNickNamePlayerException.class)
     public ResponseEntity<ReturnCodeVO> handleSameNickNameException(SameNickNamePlayerException sameNickNamePlayerException) {
         log.info(sameNickNamePlayerException.getMessage());
         return new ResponseEntity<>(ReturnCodeVO.builder().returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue()).build(), HttpStatus.OK);
     }
 
+    /**
+     * 중복되서 문제가 됬는데 또 중복된 닉네임으로 바꾸려서 할떄
+     * @param sameNickNamePlayerException
+     * @return
+     */
     @ExceptionHandler(SameAlreadyNickNamePlayerException.class)
-    public ResponseEntity<ReturnCodeVO> handleSameAlreadyNickNameException(SameAlreadyNickNamePlayerException sameAlreadyNickNamePlayerException) {
-        log.info(sameAlreadyNickNamePlayerException.getMessage());
+    public ResponseEntity<ReturnCodeVO> handleSameNickNameException(SameAlreadyNickNamePlayerException sameNickNamePlayerException) {
+        log.info(sameNickNamePlayerException.getMessage());
         return new ResponseEntity<>(ReturnCodeVO.builder().returnCode(ReturnCode.SAME_ALREADY_USED_NICK_NAME.getValue()).build(), HttpStatus.OK);
     }
 

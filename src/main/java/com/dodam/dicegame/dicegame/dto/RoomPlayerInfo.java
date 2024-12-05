@@ -7,6 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class RoomPlayerInfo {
     int targetNumber;
     int diceCount;
@@ -14,4 +15,5 @@ public class RoomPlayerInfo {
     String nickName;
     Long roomId;
     int maxPlayer;
+    String entryCode;
 }

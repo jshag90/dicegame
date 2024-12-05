@@ -42,10 +42,17 @@ public class RoomController {
     @Operation(summary = "비공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
     public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinSecretRoomPlayer(
             @RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
-        Long findRoomId = roomService.joinSecretRoomPlayer(joinRoomPlayerVO);
+        Room findRoom = roomService.joinSecretRoomPlayer(joinRoomPlayerVO);
+        if (roomService.isAlreadyUsedNickName(findRoom, joinRoomPlayerVO.getNickName())) {
+            return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
+                    .returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue())
+                    .data(roomService.handleJoinRoomPlayer(findRoom.getId(), joinRoomPlayerVO.getNickName()))
+                    .build());
+        }
+
         return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
-                .returnCode(findRoomId.intValue())
-                .data(roomService.handleJoinRoomPlayer(findRoomId, joinRoomPlayerVO.getNickName()))
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(roomService.handleJoinRoomPlayer(findRoom.getId(), joinRoomPlayerVO.getNickName()))
                 .build());
     }
 
