@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,26 +18,34 @@ import java.util.concurrent.ConcurrentHashMap;
 @NoArgsConstructor
 public class WebSocketRoomManager {
 
-    private final Map<String, Set<String>> roomUserMap = new ConcurrentHashMap<>();
+    public final Map<String, Set<String>> roomSessionIdMap = new ConcurrentHashMap<>(); //roomId,sessionId
+    public final Map<String, WebSocketSession> sessionMap = new ConcurrentHashMap<>(); //sessionId,WebSocketSession
 
-    public void addUserToRoom(String roomId, String userId) {
-        roomUserMap.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(userId);
-        log.info("User {} added to room {}", userId, roomId);
+    public void addSessionToRoom(String roomId, String sessionId, WebSocketSession session) {
+        roomSessionIdMap.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
+        sessionMap.put(sessionId, session);
+        log.info("addSessionToRoom roomSessionIdMap :  {}", roomSessionIdMap);
+        log.info("addSessionToRoom sessionMap : {}", sessionMap);
     }
 
-    public void removeUserFromRoom(String userId) {
-        roomUserMap.forEach((roomId, users) -> {
-            if (users.remove(userId)) {
-                log.info("User {} removed from room {}", userId, roomId);
-                if (users.isEmpty()) {
-                    roomUserMap.remove(roomId);
-                    log.info("Room {} is empty and removed", roomId);
-                }
-            }
-        });
+    public WebSocketSession getSessionById(String sessionId) {
+        return sessionMap.get(sessionId);
     }
 
-    public Set<String> getUsersInRoom(String roomId) {
-        return roomUserMap.getOrDefault(roomId, ConcurrentHashMap.newKeySet());
+    public void removeSessionById(String sessionId) {
+        sessionMap.remove(sessionId);
+        roomSessionIdMap.values().forEach(sessions -> sessions.remove(sessionId));
     }
+
+
+    public Set<String> getSessionsInRoom(String roomId) {
+        return roomSessionIdMap.getOrDefault(roomId, ConcurrentHashMap.newKeySet());
+    }
+
+    public Integer getRoomMembersCount(String roomId) {
+        Set<String> sessionIdList = roomSessionIdMap.getOrDefault(roomId, ConcurrentHashMap.newKeySet());
+        return sessionIdList.size();
+    }
+
+
 }
