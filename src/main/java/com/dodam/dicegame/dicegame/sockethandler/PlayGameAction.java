@@ -35,15 +35,38 @@ public class PlayGameAction implements BroadcastByActionType {
         Set<String> roomAllSession = Optional.ofNullable(webSocketRoomService.roomIdSessionIdMap.get(socketPayloadVO.getRoomId())).orElse(Collections.emptySet());
         Set<String> roomPlayDoneSession = Optional.ofNullable(webSocketRoomService.roomIdPlayDoneMap.get(socketPayloadVO.getRoomId())).orElse(Collections.emptySet());
 
-        String playDoneMessage = roomAllSession.size() == roomPlayDoneSession.size() ? "done" : "wait";
+        //플레이어가 stop을 선택했을 경우
+        if (socketPayloadVO.getIsGo().equals("N")) {
+            putRoomIdStopCountMap(socketPayloadVO);
+        }
+
+        int roomStopCount = webSocketRoomService.roomIdStopCountMap.get(socketPayloadVO.getRoomId()) == null ? 0 : webSocketRoomService.roomIdStopCountMap.get(socketPayloadVO.getRoomId());
+
+        int roomAllSessionSize = roomAllSession.size() - roomStopCount;
+        String playDoneMessage = roomAllSessionSize == roomPlayDoneSession.size() ? "done" : "wait";
+        playDoneMessage = isAllPlayerStop(roomAllSession, roomStopCount, playDoneMessage); //모든 플레이어가 stop을 선택했을 경우
         ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                 .action(socketPayloadVO.getAction())
                 .message(playDoneMessage)
                 .build();
+
         broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), null, gson.toJson(responseSocketPayloadVO));
 
         if ("done".equals(playDoneMessage)) {
             webSocketRoomService.roomIdPlayDoneMap.remove(socketPayloadVO.getRoomId());
+        }
+    }
+
+    private static String isAllPlayerStop(Set<String> roomAllSession, int roomStopCount, String playDoneMessage) {
+        return roomAllSession.size() == roomStopCount ? "end" : playDoneMessage;
+    }
+
+    private void putRoomIdStopCountMap(SocketPayloadVO socketPayloadVO) {
+        if (webSocketRoomService.roomIdStopCountMap.get(socketPayloadVO.getRoomId()) == null) {
+            webSocketRoomService.roomIdStopCountMap.put(socketPayloadVO.getRoomId(), 1);
+        } else {
+            Integer currentStopCount = webSocketRoomService.roomIdStopCountMap.get(socketPayloadVO.getRoomId());
+            webSocketRoomService.roomIdStopCountMap.put(socketPayloadVO.getRoomId(), currentStopCount + 1);
         }
     }
 
