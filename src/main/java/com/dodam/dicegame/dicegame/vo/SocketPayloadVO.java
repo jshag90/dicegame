@@ -11,6 +11,7 @@ public class SocketPayloadVO {
     String action;
     String roomId;
     String nickName;
+    String isGo;
   /*  String round;
     String isGo;*/
 }
