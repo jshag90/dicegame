@@ -7,8 +7,7 @@ import lombok.Setter;
 @Setter
 public class SaveScoreVO {
     Long roomId;
-    Long playerId;
-    Integer round;
+    String nickName;
+    Integer finalRound;
     Integer score;
-    String isGo;
 }

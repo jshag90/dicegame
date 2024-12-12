@@ -25,5 +25,7 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.id = :playerId AND p.nickName = :nickName")
     boolean existsByIdAndNickName(@Param("playerId") Long playerId, @Param("nickName") String nickName);
 
+    Long findIdByRoom_IdAndNickName(Long roomId, String nickName);
+
 
 }

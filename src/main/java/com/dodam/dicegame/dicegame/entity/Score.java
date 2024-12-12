@@ -17,9 +17,7 @@ public class Score {
 
     private int score;
 
-    private int round;
-
-    private String isGo;
+    private int finalRound;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "room_id")

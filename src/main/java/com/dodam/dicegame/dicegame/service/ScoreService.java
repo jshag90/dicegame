@@ -17,11 +17,12 @@ public class ScoreService {
     private final PlayerRepository playerRepository;
 
     public void saveScore(SaveScoreVO saveScoreVO) {
+        Long playerId = playerRepository.findIdByRoom_IdAndNickName(saveScoreVO.getRoomId(), saveScoreVO.getNickName());
 
         scoreRepository.save(Score.builder().score(saveScoreVO.getScore())
                 .room(roomRepository.findById(saveScoreVO.getRoomId()).get())
-                .player(playerRepository.findById(saveScoreVO.getPlayerId()).get())
-                .round(saveScoreVO.getRound())
+                .player(playerRepository.findById(playerId).get())
+                .finalRound(saveScoreVO.getFinalRound())
                 .build()
         );
 
