@@ -27,7 +27,7 @@ public class StartGameAction implements BroadcastByActionType {
     public void broadcastToClient(WebSocketSession session, SocketPayloadVO socketPayloadVO) {
         ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                 .action(socketPayloadVO.getAction())
-                .message(socketPayloadVO.getRoomId() + "번방 게임을 시작합니다.")
+                .message(socketPayloadVO.getRoomId() + "번방에서 게임을 시작합니다.")
                 .build();
         broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), null, gson.toJson(responseSocketPayloadVO));
     }

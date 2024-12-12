@@ -37,19 +37,23 @@ public class PlayGameAction implements BroadcastByActionType {
 
         //플레이어가 stop을 선택했을 경우
         if (socketPayloadVO.getIsGo().equals("N")) {
-            putRoomIdStopCountMap(socketPayloadVO);
+            putRoomIdStopCountMap(socketPayloadVO, session );
         }
 
-        int roomStopCount = webSocketRoomService.roomIdStopCountMap.get(socketPayloadVO.getRoomId()) == null ? 0 : webSocketRoomService.roomIdStopCountMap.get(socketPayloadVO.getRoomId());
+        int roomStopCount = webSocketRoomService.roomIdStopSessionIdMap.get(socketPayloadVO.getRoomId()) == null ? 0 : webSocketRoomService.roomIdStopSessionIdMap.get(socketPayloadVO.getRoomId()).size();
 
         int roomAllSessionSize = roomAllSession.size() - roomStopCount;
-        String playDoneMessage = roomAllSessionSize == roomPlayDoneSession.size() ? "done" : "wait";
-        playDoneMessage = isAllPlayerStop(roomAllSession, roomStopCount, playDoneMessage); //모든 플레이어가 stop을 선택했을 경우
+        log.info("roomAllSessionSize {}", roomAllSessionSize);
+        log.info("roomStopCount {}", roomStopCount);
+        String playDoneMessage = roomAllSessionSize <= roomPlayDoneSession.size() ? "done" : "wait";
+        playDoneMessage = roomAllSession.size() <= roomStopCount ? "end" : playDoneMessage;
+
         ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                 .action(socketPayloadVO.getAction())
                 .message(playDoneMessage)
                 .build();
 
+        log.info("broadcastToRoom() {}", gson.toJson(responseSocketPayloadVO));
         broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), null, gson.toJson(responseSocketPayloadVO));
 
         if ("done".equals(playDoneMessage)) {
@@ -57,17 +61,12 @@ public class PlayGameAction implements BroadcastByActionType {
         }
     }
 
-    private static String isAllPlayerStop(Set<String> roomAllSession, int roomStopCount, String playDoneMessage) {
-        return roomAllSession.size() == roomStopCount ? "end" : playDoneMessage;
-    }
 
-    private void putRoomIdStopCountMap(SocketPayloadVO socketPayloadVO) {
-        if (webSocketRoomService.roomIdStopCountMap.get(socketPayloadVO.getRoomId()) == null) {
-            webSocketRoomService.roomIdStopCountMap.put(socketPayloadVO.getRoomId(), 1);
-        } else {
-            Integer currentStopCount = webSocketRoomService.roomIdStopCountMap.get(socketPayloadVO.getRoomId());
-            webSocketRoomService.roomIdStopCountMap.put(socketPayloadVO.getRoomId(), currentStopCount + 1);
-        }
+    private void putRoomIdStopCountMap(SocketPayloadVO socketPayloadVO, WebSocketSession session) {
+        webSocketRoomService.roomIdStopSessionIdMap
+                .computeIfAbsent(socketPayloadVO.getRoomId(), key -> ConcurrentHashMap.newKeySet())
+                .add(session.getId());
+        log.info("putRoomIdStopCountMap() {}", webSocketRoomService.roomIdStopSessionIdMap);
     }
 
 }
