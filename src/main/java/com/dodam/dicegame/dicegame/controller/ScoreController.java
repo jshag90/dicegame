@@ -1,6 +1,7 @@
 package com.dodam.dicegame.dicegame.controller;
 
 import com.dodam.dicegame.dicegame.dto.ScoreResults;
+import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
 import com.dodam.dicegame.dicegame.service.ScoreService;
 import com.dodam.dicegame.dicegame.util.ReturnCode;
 import com.dodam.dicegame.dicegame.vo.*;
@@ -37,7 +38,7 @@ public class ScoreController {
 
     @GetMapping("/results/room-id={roomId}")
     @Operation(summary = "게임 결과 조회", description = "플레이어 게임 결과 순위 조회")
-    public ResponseEntity<ReturnCodeVO<List<ScoreResults>>> getGameScoreResults(@PathVariable("roomId") Long roomId) {
+    public ResponseEntity<ReturnCodeVO<List<ScoreResults>>> getGameScoreResults(@PathVariable("roomId") Long roomId) throws NoExistRoomException {
         log.info("/results/room-id {}", roomId);
         return ResponseEntity.ok(ReturnCodeVO.<List<ScoreResults>>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())

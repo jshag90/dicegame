@@ -4,6 +4,7 @@ import com.dodam.dicegame.dicegame.dto.ScoreResults;
 import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.entity.Score;
+import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
 import com.dodam.dicegame.dicegame.repository.PlayerRepository;
 import com.dodam.dicegame.dicegame.repository.RoomRepository;
 import com.dodam.dicegame.dicegame.repository.ScoreRepository;
@@ -35,10 +36,10 @@ public class ScoreService {
 
     }
 
-    public List<ScoreResults> getGameScoreResults(Long roomId) {
+    public List<ScoreResults> getGameScoreResults(Long roomId) throws NoExistRoomException {
         Optional<Room> findRoom = roomRepository.findById(roomId);
         if (findRoom.isEmpty()) {
-            throw new IllegalArgumentException("Room not found with id: " + roomId);
+            throw new NoExistRoomException("해당 roomId가 존재하지 않음 : " + roomId);
         }
 
         List<Score> findScore = scoreRepository.findByRoom(findRoom.get());
