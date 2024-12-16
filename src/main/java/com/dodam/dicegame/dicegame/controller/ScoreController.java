@@ -38,7 +38,7 @@ public class ScoreController {
 
     @GetMapping("/results/room-id={roomId}")
     @Operation(summary = "게임 결과 조회", description = "플레이어 게임 결과 순위 조회")
-    public ResponseEntity<ReturnCodeVO<List<ScoreResults>>> getGameScoreResults(@PathVariable("roomId") Long roomId) throws NoExistRoomException {
+    public ResponseEntity<ReturnCodeVO<List<ScoreResults>>> getGameScoreResults(@PathVariable("roomId") Long roomId) throws NoExistRoomException, InterruptedException {
         log.info("/results/room-id {}", roomId);
         return ResponseEntity.ok(ReturnCodeVO.<List<ScoreResults>>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())

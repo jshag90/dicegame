@@ -14,7 +14,7 @@ public class WebSocketRoomService {
 
     public final Map<String, Set<String>> roomIdSessionIdMap = new ConcurrentHashMap<>(); //roomId, sessionId
     public final Map<String, Set<String>> roomIdPlayDoneMap = new ConcurrentHashMap<>(); //roomId, playDoneSessionId
-    public final Map<String, Set<String>> roomIdStopSessionIdMap = new ConcurrentHashMap<>(); //roomId, count
+    public final Map<String, Set<String>> roomIdStopSessionIdMap = new ConcurrentHashMap<>(); //roomId, sessionId
     public final Map<String, WebSocketSession> sessionMap = new ConcurrentHashMap<>(); //sessionId, WebSocketSession
 
     public void addSessionToRoom(String roomId, String sessionId, WebSocketSession session) {

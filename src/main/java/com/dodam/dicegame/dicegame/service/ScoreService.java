@@ -10,6 +10,7 @@ import com.dodam.dicegame.dicegame.repository.RoomRepository;
 import com.dodam.dicegame.dicegame.repository.ScoreRepository;
 import com.dodam.dicegame.dicegame.vo.SaveScoreVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,11 +19,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ScoreService {
 
     private final RoomRepository roomRepository;
     private final ScoreRepository scoreRepository;
     private final PlayerRepository playerRepository;
+
+    private final WebSocketRoomService webSocketRoomService;
 
     public void saveScore(SaveScoreVO saveScoreVO) {
         Long playerId = playerRepository.findIdByRoomIdAndNickName(saveScoreVO.getRoomId(), saveScoreVO.getNickName());
@@ -36,13 +40,19 @@ public class ScoreService {
 
     }
 
-    public List<ScoreResults> getGameScoreResults(Long roomId) throws NoExistRoomException {
+    public List<ScoreResults> getGameScoreResults(Long roomId) throws NoExistRoomException, InterruptedException {
         Optional<Room> findRoom = roomRepository.findById(roomId);
         if (findRoom.isEmpty()) {
             throw new NoExistRoomException("해당 roomId가 존재하지 않음 : " + roomId);
         }
 
-        List<Score> findScore = scoreRepository.findByRoom(findRoom.get());
+        List<Score> findScore;
+        do {
+            findScore = scoreRepository.findByRoom(findRoom.get());
+            log.info("findScore size {} - {} ", roomId, findScore.size());
+            Thread.sleep(3000);
+        } while (findScore.size() < playerRepository.countByRoom(findRoom.get())); //해당 방에 모든 사용자가 점수가 등록할때 까지 대기
+
         int targetNumber = findRoom.get().getTargetNumber();
 
         List<ScoreResults> scoreResultsList = new ArrayList<>();
@@ -62,7 +72,7 @@ public class ScoreService {
         // 정렬 및 순위 설정
         sortScoreResults(scoreResultsList);
         assignRanks(scoreResultsList);
-
+        log.info("scoreResultsList() {}",scoreResultsList);
         return scoreResultsList;
     }
 
