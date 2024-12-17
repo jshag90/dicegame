@@ -40,8 +40,10 @@ public class WebSocketRoomService {
 
     public void removeSessionById(String sessionId) {
         log.info("removeSessionById() : {}", sessionId);
-        sessionMap.remove(sessionId);
         roomIdSessionIdMap.values().forEach(sessions -> sessions.remove(sessionId));
+        roomIdStopSessionIdMap.values().forEach(sessions -> sessions.remove(sessionId));
+        roomIdPlayDoneMap.values().forEach(sessions -> sessions.remove(sessionId));
+        sessionMap.remove(sessionId);
     }
 
 }

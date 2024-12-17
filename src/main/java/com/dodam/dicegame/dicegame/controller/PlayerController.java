@@ -35,4 +35,19 @@ public class PlayerController {
                 .build());
     }
 
+    @DeleteMapping("/delete/in-room/{roomId}/{nickName}")
+    @Operation(summary = "플레이어를 방에서 제거", description = "플레이어를 방에서 제거합니다.")
+    public ResponseEntity<ReturnCodeVO<Void>> deletePlayerInRoom(
+            @PathVariable("roomId") String roomId,
+            @PathVariable("nickName") String nickName) {
+
+        log.info("/delete/in-room/{}/{}", roomId, nickName);
+
+        playerService.deletePlayerInRoom(Long.valueOf(roomId), nickName);
+
+        return ResponseEntity.ok(ReturnCodeVO.<Void>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .build());
+    }
+
 }

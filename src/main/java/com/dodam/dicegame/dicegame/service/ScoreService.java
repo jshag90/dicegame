@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
@@ -25,18 +28,34 @@ public class ScoreService {
     private final RoomRepository roomRepository;
     private final ScoreRepository scoreRepository;
     private final PlayerRepository playerRepository;
-
-    private final WebSocketRoomService webSocketRoomService;
+    private final Map<Long, String> isDoneSaveScoreMap = new ConcurrentHashMap<>();
+    private final AtomicBoolean isSaving = new AtomicBoolean(false);
 
     public void saveScore(SaveScoreVO saveScoreVO) {
         Long playerId = playerRepository.findIdByRoomIdAndNickName(saveScoreVO.getRoomId(), saveScoreVO.getNickName());
 
-        scoreRepository.save(Score.builder().score(saveScoreVO.getScore())
-                .room(roomRepository.findById(saveScoreVO.getRoomId()).get())
-                .player(playerRepository.findById(playerId).get())
-                .finalRound(saveScoreVO.getFinalRound())
-                .build()
-        );
+        Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
+        Player findPlayer = playerRepository.findById(playerId).get();
+
+        if (isSaving.compareAndSet(false, true)) {
+            if (!scoreRepository.existsByPlayerIdAndRoomId(findPlayer.getId(), findRoom.getId())) {
+                scoreRepository.save(
+                        Score.builder()
+                                .score(saveScoreVO.getScore())
+                                .room(findRoom)
+                                .player(findPlayer)
+                                .finalRound(saveScoreVO.getFinalRound())
+                                .build()
+                );
+            }
+            isSaving.set(false);
+        }
+
+        if (playerRepository.countByRoom(findRoom) <= scoreRepository.findByRoom(findRoom).size()) {
+            isDoneSaveScoreMap.put(saveScoreVO.getRoomId(), "Y");
+        } else {
+            isDoneSaveScoreMap.put(saveScoreVO.getRoomId(), "N");
+        }
 
     }
 
@@ -46,15 +65,14 @@ public class ScoreService {
             throw new NoExistRoomException("해당 roomId가 존재하지 않음 : " + roomId);
         }
 
-        List<Score> findScore;
-        do {
-            findScore = scoreRepository.findByRoom(findRoom.get());
-            log.info("findScore size {} - {} ", roomId, findScore.size());
+        List<Score> findScore = scoreRepository.findByRoom(findRoom.get());
+        while (isDoneSaveScoreMap.get(roomId).equals("N")) {
             Thread.sleep(3000);
-        } while (findScore.size() < playerRepository.countByRoom(findRoom.get())); //해당 방에 모든 사용자가 점수가 등록할때 까지 대기
+            findScore.clear();
+            findScore = scoreRepository.findByRoom(findRoom.get());
+        }
 
         int targetNumber = findRoom.get().getTargetNumber();
-
         List<ScoreResults> scoreResultsList = new ArrayList<>();
         for (Score score : findScore) {
             Player findPlayer = playerRepository.findById(score.getPlayer().getId()).orElseThrow(
@@ -72,7 +90,7 @@ public class ScoreService {
         // 정렬 및 순위 설정
         sortScoreResults(scoreResultsList);
         assignRanks(scoreResultsList);
-        log.info("scoreResultsList() {}",scoreResultsList);
+        log.info("scoreResultsList() {}", scoreResultsList);
         return scoreResultsList;
     }
 
