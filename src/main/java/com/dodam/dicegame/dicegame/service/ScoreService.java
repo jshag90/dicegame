@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
@@ -28,7 +29,7 @@ public class ScoreService {
     private final RoomRepository roomRepository;
     private final ScoreRepository scoreRepository;
     private final PlayerRepository playerRepository;
-    private final Map<Long, String> isDoneSaveScoreMap = new ConcurrentHashMap<>();
+    private final Map<Long, CountDownLatch> latchMap = new ConcurrentHashMap<>();
     private final AtomicBoolean isSaving = new AtomicBoolean(false);
 
     public void saveScore(SaveScoreVO saveScoreVO) {
@@ -51,10 +52,10 @@ public class ScoreService {
             isSaving.set(false);
         }
 
+        latchMap.putIfAbsent(saveScoreVO.getRoomId(), new CountDownLatch(1));
+
         if (playerRepository.countByRoom(findRoom) <= scoreRepository.findByRoom(findRoom).size()) {
-            isDoneSaveScoreMap.put(saveScoreVO.getRoomId(), "Y");
-        } else {
-            isDoneSaveScoreMap.put(saveScoreVO.getRoomId(), "N");
+            latchMap.get(saveScoreVO.getRoomId()).countDown();
         }
 
     }
@@ -65,12 +66,8 @@ public class ScoreService {
             throw new NoExistRoomException("해당 roomId가 존재하지 않음 : " + roomId);
         }
 
+        latchMap.get(roomId).await();
         List<Score> findScore = scoreRepository.findByRoom(findRoom.get());
-        while (isDoneSaveScoreMap.get(roomId).equals("N")) {
-            Thread.sleep(3000);
-            findScore.clear();
-            findScore = scoreRepository.findByRoom(findRoom.get());
-        }
 
         int targetNumber = findRoom.get().getTargetNumber();
         List<ScoreResults> scoreResultsList = new ArrayList<>();
