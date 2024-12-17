@@ -55,7 +55,7 @@ public class PlayerService {
             playerRepository.deleteById(findPlayerId);
 
         Room findRoom = roomRepository.findById(roomId).get();
-        if (playerRepository.countByRoom(findRoom) < 1) {
+        if (playerRepository.countByRoom(findRoom) == 0) {
             roomRepository.deleteById(roomId);
         }
     }
