@@ -87,10 +87,12 @@ public class RoomService {
         RoomPlayerInfo roomPlayerInfo = RoomPlayerInfo.builder().targetNumber(findRoom.getTargetNumber())
                 .diceCount(findRoom.getDiceCount())
                 .playerId(joinPlayer.getId())
+                .isRoomMaster(joinPlayer.getIsManager())
                 .nickName(joinPlayer.getNickName())
                 .roomId(findRoom.getId())
                 .maxPlayer(findRoom.getMaxPlayers())
                 .entryCode(findRoom.getEntryCode())
+                .isPublic(findRoom.getRoomType().equals("secret")?"false":"true")
                 .build();
         log.info(roomPlayerInfo.toString());
         return roomPlayerInfo;

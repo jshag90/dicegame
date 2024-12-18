@@ -16,4 +16,6 @@ public class RoomPlayerInfo {
     Long roomId;
     int maxPlayer;
     String entryCode;
+    String isRoomMaster;
+    String isPublic;
 }
