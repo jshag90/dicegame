@@ -6,7 +6,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@ToString
 public class ResponseSocketPayloadVO {
     String action;
     String message;
+    String subMessage;
 }

@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
     long countByRoom(Room room);
@@ -22,10 +24,16 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Modifying
     void updateNickNameById(@Param("playerId") Long playerId, @Param("nickName") String nickName);
 
+    @Modifying
+    @Query("UPDATE Player p SET p.isManager = :isManager WHERE p.id = :playerId")
+    void updateIsMasterById(@Param("playerId") Long playerId, @Param("isManager") String isManager);
+
     @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.id = :playerId AND p.nickName = :nickName")
     boolean existsByIdAndNickName(@Param("playerId") Long playerId, @Param("nickName") String nickName);
     @Query("SELECT p.id FROM Player p WHERE p.room.id = :roomId AND p.nickName = :nickName")
     Long findIdByRoomIdAndNickName(Long roomId, String nickName);
 
+    @Query("SELECT p.id FROM Player p WHERE p.room.id = :roomId AND p.nickName != :nickName")
+    List<Long> findIdByRoomIdAndNotNickName(Long roomId, String nickName);
 
 }
