@@ -33,18 +33,15 @@ public class ScoreService {
     private final AtomicBoolean isSaving = new AtomicBoolean(false);
 
     public void saveScore(SaveScoreVO saveScoreVO) {
-        Long playerId = playerRepository.findIdByRoomIdAndNickName(saveScoreVO.getRoomId(), saveScoreVO.getNickName());
 
         Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
-        Player findPlayer = playerRepository.findById(playerId).get();
-
         if (isSaving.compareAndSet(false, true)) {
-            if (!scoreRepository.existsByPlayerIdAndRoomId(findPlayer.getId(), findRoom.getId())) {
+            if (!scoreRepository.existsByNickNameAndRoomId(saveScoreVO.getNickName(),findRoom.getId())) {
                 scoreRepository.save(
                         Score.builder()
                                 .score(saveScoreVO.getScore())
                                 .room(findRoom)
-                                .player(findPlayer)
+                                .nickName(saveScoreVO.getNickName())
                                 .finalRound(saveScoreVO.getFinalRound())
                                 .build()
                 );
@@ -72,12 +69,8 @@ public class ScoreService {
         int targetNumber = findRoom.get().getTargetNumber();
         List<ScoreResults> scoreResultsList = new ArrayList<>();
         for (Score score : findScore) {
-            Player findPlayer = playerRepository.findById(score.getPlayer().getId()).orElseThrow(
-                    () -> new IllegalArgumentException("Player not found with id: " + score.getPlayer().getId())
-            );
-
             scoreResultsList.add(ScoreResults.builder()
-                    .nickName(findPlayer.getNickName())
+                    .nickName(score.getNickName())
                     .score(score.getScore())
                     .roomId(roomId.intValue())
                     .targetNumber(targetNumber)

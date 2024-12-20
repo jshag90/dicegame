@@ -1,7 +1,9 @@
 package com.dodam.dicegame.dicegame.sockethandler;
 
 import com.dodam.dicegame.dicegame.entity.Player;
+import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.repository.PlayerRepository;
+import com.dodam.dicegame.dicegame.repository.RoomRepository;
 import com.dodam.dicegame.dicegame.service.WebSocketRoomService;
 import com.dodam.dicegame.dicegame.vo.ResponseSocketPayloadVO;
 import com.dodam.dicegame.dicegame.vo.SocketPayloadVO;
@@ -25,6 +27,10 @@ public class LeaveRoomAction implements BroadcastByActionType{
 
     private final PlayerRepository playerRepository;
 
+    private final RoomRepository roomRepository;
+
+    private final GetRoomsCountAction getRoomsCountAction;
+
     @Override
     public boolean isAction(String action) {
         return "leaveRoom".equals(action);
@@ -38,7 +44,10 @@ public class LeaveRoomAction implements BroadcastByActionType{
         String message="",subMessage="";
         List<Long> otherNickNamePlayerIds = playerRepository.findIdByRoomIdAndNotNickName(Long.valueOf(socketPayloadVO.getRoomId()), socketPayloadVO.getNickName());
 
-        if(otherNickNamePlayerIds.size() > 0){
+        webSocketRoomService.removeSessionById(session.getId());
+
+        Room findRoom = roomRepository.findById(Long.valueOf(socketPayloadVO.getRoomId())).get();
+        if(findRoom.getIsGameStarted().equals("N") && otherNickNamePlayerIds.size() > 0){
 
             if(findPlayer.getIsManager().equals("N")){
                 message = socketPayloadVO.getNickName();
@@ -63,6 +72,17 @@ public class LeaveRoomAction implements BroadcastByActionType{
             log.info("broadcastToRoom()-{}", responseSocketPayloadVO);
         }
 
+        if(findRoom.getIsGameStarted().equals("Y") && otherNickNamePlayerIds.size() < 2){
+            ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
+                    .action("playGame")
+                    .message("done")
+                    .build();
+
+            log.info("broadcastToRoom() {}", gson.toJson(responseSocketPayloadVO));
+            broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), null, gson.toJson(responseSocketPayloadVO));
+        }
+
+        getRoomsCountAction.broadcastToClient(session, SocketPayloadVO.builder().action("getRoomsCount").roomId(socketPayloadVO.getRoomId()).build());
     }
 
 }

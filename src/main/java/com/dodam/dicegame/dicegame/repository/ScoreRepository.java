@@ -13,5 +13,5 @@ import java.util.List;
 public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Score> findByRoom(Room room);
 
-    boolean existsByPlayerIdAndRoomId(Long playerId, Long roomId);
+    boolean existsByNickNameAndRoomId(String nickName, Long roomId);
 }

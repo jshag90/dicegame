@@ -36,6 +36,7 @@ public class RoomService {
                 .targetNumber(roomInfoVO.getTargetNumber())
                 .roomType(roomInfoVO.getRoomType().getValue())
                 .entryCode(roomInfoVO.getEntryCode())
+                .isGameStarted("N")
                 .build());
 
         //방 생성자가 방장
