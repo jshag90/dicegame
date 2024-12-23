@@ -72,17 +72,19 @@ public class LeaveRoomAction implements BroadcastByActionType{
             log.info("broadcastToRoom()-{}", responseSocketPayloadVO);
         }
 
+
         if(findRoom.getIsGameStarted().equals("Y") && otherNickNamePlayerIds.size() < 2){
             ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                     .action("playGame")
-                    .message("done")
+                    .message("end")
                     .build();
 
             log.info("broadcastToRoom() {}", gson.toJson(responseSocketPayloadVO));
-            broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), null, gson.toJson(responseSocketPayloadVO));
+            broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), session.getId(), gson.toJson(responseSocketPayloadVO));
         }
 
         getRoomsCountAction.broadcastToClient(session, SocketPayloadVO.builder().action("getRoomsCount").roomId(socketPayloadVO.getRoomId()).build());
+
     }
 
 }

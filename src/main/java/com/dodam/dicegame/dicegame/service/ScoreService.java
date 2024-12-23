@@ -36,7 +36,7 @@ public class ScoreService {
 
         Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
         if (isSaving.compareAndSet(false, true)) {
-            if (!scoreRepository.existsByNickNameAndRoomId(saveScoreVO.getNickName(),findRoom.getId())) {
+            if (!scoreRepository.existsByNickNameAndRoomId(saveScoreVO.getNickName(),findRoom.getId()) && saveScoreVO.getScore() > 0) {
                 scoreRepository.save(
                         Score.builder()
                                 .score(saveScoreVO.getScore())
