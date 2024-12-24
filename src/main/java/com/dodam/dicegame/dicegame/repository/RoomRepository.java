@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface RoomRepository extends JpaRepository<Room, Long> {
     Optional<Room> findByIdAndEntryCode(Long roomId, String entryCode);
 
-    @Query("SELECT r FROM Room r WHERE r.roomType = :roomType AND r.maxPlayers > (SELECT COUNT(p) FROM Player p WHERE p.room.id = r.id )")
+    @Query("SELECT r FROM Room r WHERE r.roomType = :roomType AND r.maxPlayers > (SELECT COUNT(p) FROM Player p WHERE p.room.id = r.id) AND r.isGameStarted = 'N'")
     Optional<Room> findAvailableMaxPlayerPublicRoom(@Param("roomType") String roomType, PageRequest pageable);
 
     @Modifying

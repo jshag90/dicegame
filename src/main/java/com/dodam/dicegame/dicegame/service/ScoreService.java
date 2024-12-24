@@ -34,25 +34,29 @@ public class ScoreService {
 
     public void saveScore(SaveScoreVO saveScoreVO) {
 
-        Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
-        if (isSaving.compareAndSet(false, true)) {
-            if (!scoreRepository.existsByNickNameAndRoomId(saveScoreVO.getNickName(),findRoom.getId()) && saveScoreVO.getScore() > 0) {
-                scoreRepository.save(
-                        Score.builder()
-                                .score(saveScoreVO.getScore())
-                                .room(findRoom)
-                                .nickName(saveScoreVO.getNickName())
-                                .finalRound(saveScoreVO.getFinalRound())
-                                .build()
-                );
+        if (roomRepository.findById(saveScoreVO.getRoomId()).isPresent()) {
+
+            Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
+            if (isSaving.compareAndSet(false, true)) {
+                if (!scoreRepository.existsByNickNameAndRoomId(saveScoreVO.getNickName(), findRoom.getId()) && saveScoreVO.getScore() > 0) {
+                    scoreRepository.save(
+                            Score.builder()
+                                    .score(saveScoreVO.getScore())
+                                    .room(findRoom)
+                                    .nickName(saveScoreVO.getNickName())
+                                    .finalRound(saveScoreVO.getFinalRound())
+                                    .build()
+                    );
+                }
+                isSaving.set(false);
             }
-            isSaving.set(false);
-        }
 
-        latchMap.putIfAbsent(saveScoreVO.getRoomId(), new CountDownLatch(1));
+            latchMap.putIfAbsent(saveScoreVO.getRoomId(), new CountDownLatch(1));
 
-        if (playerRepository.countByRoom(findRoom) <= scoreRepository.findByRoom(findRoom).size()) {
-            latchMap.get(saveScoreVO.getRoomId()).countDown();
+            if (playerRepository.countByRoom(findRoom) <= scoreRepository.findByRoom(findRoom).size()) {
+                latchMap.get(saveScoreVO.getRoomId()).countDown();
+            }
+
         }
 
     }

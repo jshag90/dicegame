@@ -82,7 +82,7 @@ public class RoomService {
         Player joinPlayer = playerRepository.save(Player.builder()
                 .nickName(nickName)
                 .room(findRoom)
-                .isManager(RoomManager.NORMAL.getValue())
+                .isManager(playerRepository.existsByRoomIdAndIsManager(roomId)?RoomManager.NORMAL.getValue():RoomManager.MANAGER.getValue())
                 .build());
 
         RoomPlayerInfo roomPlayerInfo = RoomPlayerInfo.builder().targetNumber(findRoom.getTargetNumber())
@@ -92,7 +92,7 @@ public class RoomService {
                 .nickName(joinPlayer.getNickName())
                 .roomId(findRoom.getId())
                 .maxPlayer(findRoom.getMaxPlayers())
-                .entryCode(findRoom.getEntryCode())
+                .entryCode(findRoom.getEntryCode().isBlank()?"-1":findRoom.getEntryCode())
                 .isPublic(findRoom.getRoomType().equals("secret")?"false":"true")
                 .build();
         log.info(roomPlayerInfo.toString());

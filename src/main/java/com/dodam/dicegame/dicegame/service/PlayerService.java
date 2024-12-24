@@ -1,27 +1,15 @@
 package com.dodam.dicegame.dicegame.service;
 
-import com.dodam.dicegame.dicegame.dto.RoomPlayerInfo;
-import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.entity.Room;
-import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
 import com.dodam.dicegame.dicegame.exception.SameAlreadyNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.SameNickNamePlayerException;
-import com.dodam.dicegame.dicegame.exception.TooManyPlayerException;
 import com.dodam.dicegame.dicegame.repository.PlayerRepository;
 import com.dodam.dicegame.dicegame.repository.RoomRepository;
-import com.dodam.dicegame.dicegame.util.RoomManager;
-import com.dodam.dicegame.dicegame.util.RoomType;
-import com.dodam.dicegame.dicegame.vo.JoinRoomPlayerVO;
-import com.dodam.dicegame.dicegame.vo.RoomInfoVO;
-import com.dodam.dicegame.dicegame.vo.RoomSettingInfoVO;
+import com.dodam.dicegame.dicegame.repository.ScoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +19,7 @@ public class PlayerService {
 
     private final PlayerRepository playerRepository;
     private final RoomRepository roomRepository;
+    private final ScoreRepository scoreRepository;
 
 
     @Transactional
@@ -54,9 +43,12 @@ public class PlayerService {
         if (findPlayerId != null)
             playerRepository.deleteById(findPlayerId);
 
-        Room findRoom = roomRepository.findById(roomId).get();
-        if (playerRepository.countByRoom(findRoom) == 0) {
-            roomRepository.deleteById(roomId);
+        if(roomRepository.findById(roomId).isPresent()) {
+            Room findRoom = roomRepository.findById(roomId).get();
+            if (playerRepository.countByRoom(findRoom) == 0) {
+                scoreRepository.deleteByRoom(findRoom);
+                roomRepository.deleteById(roomId);
+            }
         }
     }
 }

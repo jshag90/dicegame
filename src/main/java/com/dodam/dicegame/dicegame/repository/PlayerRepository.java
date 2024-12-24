@@ -36,4 +36,12 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("SELECT p.id FROM Player p WHERE p.room.id = :roomId AND p.nickName != :nickName")
     List<Long> findIdByRoomIdAndNotNickName(Long roomId, String nickName);
 
+    /**
+     * 방장이 있는 지 검사
+     * @param roomId
+     * @return
+     */
+    @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room.id = :roomId AND p.isManager = 'Y'")
+    boolean existsByRoomIdAndIsManager(@Param("roomId") Long roomId);
+
 }
