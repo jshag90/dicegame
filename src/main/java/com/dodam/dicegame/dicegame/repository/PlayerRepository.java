@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
@@ -43,5 +44,14 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
      */
     @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room.id = :roomId AND p.isManager = 'Y'")
     boolean existsByRoomIdAndIsManager(@Param("roomId") Long roomId);
+
+    @Query("SELECT CASE WHEN COUNT(p.nickName) > 1 THEN true ELSE false END " +
+            "FROM Player p " +
+            "WHERE p.room.id = :roomId " +
+            "GROUP BY p.nickName " +
+            "HAVING COUNT(p.nickName) > 1")
+    Optional<Boolean> existsDuplicateNickNameInRoom(@Param("roomId") Long roomId);
+
+
 
 }
