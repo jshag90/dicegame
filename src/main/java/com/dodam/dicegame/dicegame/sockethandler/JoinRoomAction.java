@@ -36,14 +36,18 @@ public class JoinRoomAction implements BroadcastByActionType{
                 .message(socketPayloadVO.getNickName() + "님이 입장하였습니다.")
                 .build();
 
+        //닉네임 중복 사용자가 있는 지
         Optional<Boolean> existNickNameRoomIdOptional = playerRepository.existsDuplicateNickNameInRoom(Long.valueOf(socketPayloadVO.getRoomId()));
-        if (existNickNameRoomIdOptional.isPresent()) {
-            if (!existNickNameRoomIdOptional.get()) {
-                broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), session.getId(), gson.toJson(responseSocketPayloadVO));
-            }
-        } else {
+        if(existNickNameRoomIdOptional.isEmpty()){
+            broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), session.getId(), gson.toJson(responseSocketPayloadVO));
+            return;
+        }
+
+        //중복 닉네임이 없을 경우
+        if (!existNickNameRoomIdOptional.get()) {
             broadcastToRoom(webSocketRoomService, socketPayloadVO.getRoomId(), session.getId(), gson.toJson(responseSocketPayloadVO));
         }
+
     }
 
 }
