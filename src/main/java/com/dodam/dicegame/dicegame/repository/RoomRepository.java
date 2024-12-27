@@ -20,4 +20,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     @Modifying
     @Query("update Room r set r.isGameStarted = :isGameStarted where r.id = :roomId")
     void updateIsGameStarted(String roomId, String isGameStarted);
+
+    @Modifying
+    @Query("update Room r set r.updatedAt = CURRENT_TIMESTAMP where r.id = :roomId")
+    void updateUpdatedAt(@Param("roomId") Long roomId);
+
 }

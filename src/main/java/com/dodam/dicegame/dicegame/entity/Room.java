@@ -2,6 +2,10 @@ package com.dodam.dicegame.dicegame.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -27,4 +31,12 @@ public class Room {
 
     @Column(columnDefinition = "CHAR(1) DEFAULT 'N'")
     private String isGameStarted;
+
+    @CreationTimestamp
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 }

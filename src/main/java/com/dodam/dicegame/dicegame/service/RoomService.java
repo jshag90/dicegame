@@ -17,7 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -37,10 +39,12 @@ public class RoomService {
                 .roomType(roomInfoVO.getRoomType().getValue())
                 .entryCode(roomInfoVO.getEntryCode())
                 .isGameStarted("N")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build());
 
         //방 생성자가 방장
-        Player savePlayer = playerRepository.save(Player.builder().room(saveRoom)
+        playerRepository.save(Player.builder().room(saveRoom)
                 .isManager(RoomManager.MANAGER.getValue())
                 .nickName(roomInfoVO.getNickName())
                 .build());
@@ -60,9 +64,9 @@ public class RoomService {
     }
 
 
-
     /**
      * 예외 정책에 통과하면 찾은 방번호 return
+     *
      * @return
      */
     public Room checkJoinPublicRoomPlayer() throws NoExistRoomException {
@@ -75,6 +79,7 @@ public class RoomService {
     }
 
 
+    @Transactional
     public RoomPlayerInfo handleJoinRoomPlayer(Long roomId, String nickName) {
 
         Room findRoom = roomRepository.findById(roomId).get();
@@ -82,7 +87,7 @@ public class RoomService {
         Player joinPlayer = playerRepository.save(Player.builder()
                 .nickName(nickName)
                 .room(findRoom)
-                .isManager(playerRepository.existsByRoomIdAndIsManager(roomId)?RoomManager.NORMAL.getValue():RoomManager.MANAGER.getValue())
+                .isManager(playerRepository.existsByRoomIdAndIsManager(roomId) ? RoomManager.NORMAL.getValue() : RoomManager.MANAGER.getValue())
                 .build());
 
         RoomPlayerInfo roomPlayerInfo = RoomPlayerInfo.builder().targetNumber(findRoom.getTargetNumber())
@@ -92,15 +97,18 @@ public class RoomService {
                 .nickName(joinPlayer.getNickName())
                 .roomId(findRoom.getId())
                 .maxPlayer(findRoom.getMaxPlayers())
-                .entryCode(findRoom.getEntryCode().isBlank()?"-1":findRoom.getEntryCode())
-                .isPublic(findRoom.getRoomType().equals("secret")?"false":"true")
+                .entryCode(findRoom.getEntryCode().isBlank() ? "-1" : findRoom.getEntryCode())
+                .isPublic(findRoom.getRoomType().equals("secret") ? "false" : "true")
                 .build();
+
+        roomRepository.updateUpdatedAt(roomId);
         log.info(roomPlayerInfo.toString());
         return roomPlayerInfo;
     }
 
     /**
      * 해당 번호의 방번호가 있으면 삭제
+     *
      * @param roomId
      */
     public void removeRoom(Long roomId) {
