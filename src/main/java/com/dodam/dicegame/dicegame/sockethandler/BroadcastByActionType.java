@@ -2,6 +2,9 @@ package com.dodam.dicegame.dicegame.sockethandler;
 
 import com.dodam.dicegame.dicegame.service.WebSocketRoomService;
 import com.dodam.dicegame.dicegame.vo.SocketPayloadVO;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -9,6 +12,8 @@ import java.io.IOException;
 import java.util.Set;
 
 public interface BroadcastByActionType {
+
+    Logger log = LoggerFactory.getLogger(BroadcastByActionType.class);
 
     boolean isAction(String action);
 
@@ -22,14 +27,14 @@ public interface BroadcastByActionType {
 
         Set<String> sessionIds = webSocketRoomService.getSessionsInRoom(roomId);
         if (sessionIds == null || sessionIds.isEmpty()) {
-            System.err.println("No sessions found for room " + roomId);
+            log.info("No sessions found for room " + roomId);
             return;
         }
 
         sessionIds.forEach(sessionId -> {
             WebSocketSession session = webSocketRoomService.getSessionById(sessionId);
             if (session == null) {
-                System.err.println("Session " + sessionId + " not found for room " + roomId);
+                log.info("Session " + sessionId + " not found for room " + roomId);
                 return;
             }
 
@@ -40,7 +45,7 @@ public interface BroadcastByActionType {
             try {
                 session.sendMessage(new TextMessage(message));
             } catch (IOException e) {
-                System.err.println("Failed to send message to session " + sessionId + " in room " + roomId);
+                log.info("Failed to send message to session " + sessionId + " in room " + roomId);
                 e.printStackTrace();
             }
         });

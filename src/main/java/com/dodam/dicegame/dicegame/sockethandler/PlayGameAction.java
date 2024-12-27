@@ -1,5 +1,6 @@
 package com.dodam.dicegame.dicegame.sockethandler;
 
+import com.dodam.dicegame.dicegame.repository.RoomRepository;
 import com.dodam.dicegame.dicegame.service.WebSocketRoomService;
 import com.dodam.dicegame.dicegame.vo.ResponseSocketPayloadVO;
 import com.dodam.dicegame.dicegame.vo.SocketPayloadVO;
@@ -22,6 +23,8 @@ public class PlayGameAction implements BroadcastByActionType {
     private final WebSocketRoomService webSocketRoomService;
 
     private final Gson gson;
+
+    private final RoomRepository roomRepository;
 
     @Override
     public boolean isAction(String action) {
@@ -59,6 +62,8 @@ public class PlayGameAction implements BroadcastByActionType {
         if ("done".equals(playDoneMessage)) {
             webSocketRoomService.roomIdPlayDoneMap.remove(socketPayloadVO.getRoomId());
         }
+
+        roomRepository.updateUpdatedAt(Long.valueOf(socketPayloadVO.getRoomId()));
     }
 
 
