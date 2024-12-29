@@ -11,5 +11,5 @@ import lombok.*;
 public class JoinRoomPlayerVO {
     Long roomId;
     String entryCode;
-    String nickName;
+    String uuid;
 }

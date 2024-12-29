@@ -39,10 +39,10 @@ public class LeaveRoomAction implements BroadcastByActionType{
     @Override
     @Transactional
     public void broadcastToClient(WebSocketSession session, SocketPayloadVO socketPayloadVO) {
-        Long findPlayerId = playerRepository.findIdByRoomIdAndNickName(Long.valueOf(socketPayloadVO.getRoomId()), socketPayloadVO.getNickName());
+        Long findPlayerId = playerRepository.findIdByRoomIdAndUuid(Long.valueOf(socketPayloadVO.getRoomId()), socketPayloadVO.getUuid());
         Player findPlayer = playerRepository.findById(findPlayerId).get();
         String message="",subMessage="";
-        List<Long> otherNickNamePlayerIds = playerRepository.findIdByRoomIdAndNotNickName(Long.valueOf(socketPayloadVO.getRoomId()), socketPayloadVO.getNickName());
+        List<Long> otherNickNamePlayerIds = playerRepository.findIdByRoomIdAndNotUuid(Long.valueOf(socketPayloadVO.getRoomId()), socketPayloadVO.getUuid());
 
         webSocketRoomService.removeSessionById(session.getId());
 
@@ -50,7 +50,7 @@ public class LeaveRoomAction implements BroadcastByActionType{
         if(findRoom.getIsGameStarted().equals("N") && otherNickNamePlayerIds.size() > 0){
 
             if(findPlayer.getIsManager().equals("N")){
-                message = socketPayloadVO.getNickName();
+                message = socketPayloadVO.getUuid();
                 subMessage = "ok";
             }
 
@@ -58,7 +58,7 @@ public class LeaveRoomAction implements BroadcastByActionType{
                 Long otherNickNamePlayerId = otherNickNamePlayerIds.get(0);
                 Player findOtherPlayer = playerRepository.findById(otherNickNamePlayerId).get();
                 playerRepository.updateIsMasterById(otherNickNamePlayerId, "Y");
-                message = findOtherPlayer.getNickName();
+                message = findOtherPlayer.getUuid();
                 subMessage = "changeRoomMaster";
             }
 

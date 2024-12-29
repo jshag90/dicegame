@@ -35,15 +35,15 @@ public class PlayerController {
                 .build());
     }
 
-    @DeleteMapping("/delete/in-room/{roomId}/{nickName}")
+    @DeleteMapping("/delete/in-room/{roomId}/{uuid}")
     @Operation(summary = "플레이어를 방에서 제거", description = "플레이어를 방에서 제거합니다.")
     public ResponseEntity<ReturnCodeVO<Void>> deletePlayerInRoom(
             @PathVariable("roomId") String roomId,
-            @PathVariable("nickName") String nickName) {
+            @PathVariable("uuid") String uuid) {
 
-        log.info("/delete/in-room/{}/{}", roomId, nickName);
+        log.info("/delete/in-room/{}/{}", roomId, uuid);
 
-        playerService.deletePlayerInRoom(Long.valueOf(roomId), nickName);
+        playerService.deletePlayerInRoom(Long.valueOf(roomId), uuid);
 
         return ResponseEntity.ok(ReturnCodeVO.<Void>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())

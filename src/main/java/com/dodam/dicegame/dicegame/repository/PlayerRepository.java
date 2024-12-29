@@ -31,11 +31,22 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
     @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.id = :playerId AND p.nickName = :nickName")
     boolean existsByIdAndNickName(@Param("playerId") Long playerId, @Param("nickName") String nickName);
-    @Query("SELECT p.id FROM Player p WHERE p.room.id = :roomId AND p.nickName = :nickName")
-    Long findIdByRoomIdAndNickName(Long roomId, String nickName);
 
-    @Query("SELECT p.id FROM Player p WHERE p.room.id = :roomId AND p.nickName != :nickName")
-    List<Long> findIdByRoomIdAndNotNickName(Long roomId, String nickName);
+    @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.uuid = :uuid")
+    boolean existsByUuid(@Param("uuid") String uuid);
+
+    @Query("SELECT p FROM Player p WHERE p.uuid = :uuid")
+    Player findPlayerByUuid(@Param("uuid") String uuid);
+
+    @Query("UPDATE Player p SET p.isManager = :isManager WHERE p.uuid = :uuid")
+    @Modifying
+    void updateIsManager(@Param("uuid") String uuid, @Param("isManager") String isManager);
+
+    @Query("SELECT p.id FROM Player p WHERE p.room.id = :roomId AND p.uuid = :uuid")
+    Long findIdByRoomIdAndUuid(Long roomId, String uuid);
+
+    @Query("SELECT p.id FROM Player p WHERE p.room.id = :roomId AND p.uuid != :uuid")
+    List<Long> findIdByRoomIdAndNotUuid(Long roomId, String uuid);
 
     /**
      * 방장이 있는 지 검사

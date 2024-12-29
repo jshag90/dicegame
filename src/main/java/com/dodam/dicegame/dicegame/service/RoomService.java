@@ -43,11 +43,18 @@ public class RoomService {
                 .updatedAt(LocalDateTime.now())
                 .build());
 
-        //방 생성자가 방장
-        playerRepository.save(Player.builder().room(saveRoom)
-                .isManager(RoomManager.MANAGER.getValue())
-                .nickName(roomInfoVO.getNickName())
-                .build());
+        boolean isExistsUuid = playerRepository.existsByUuid(roomInfoVO.getUuid());
+        if (isExistsUuid) {
+            playerRepository.updateIsManager(roomInfoVO.getUuid(), RoomManager.MANAGER.getValue());
+        }
+
+        if (!isExistsUuid) {
+            playerRepository.save(Player.builder().room(saveRoom)
+                    .isManager(RoomManager.MANAGER.getValue())
+                    .uuid(roomInfoVO.getUuid())
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
 
         return saveRoom.getId();
     }
@@ -80,21 +87,31 @@ public class RoomService {
 
 
     @Transactional
-    public RoomPlayerInfo handleJoinRoomPlayer(Long roomId, String nickName) {
+    public RoomPlayerInfo handleJoinRoomPlayer(Long roomId, String uuid) {
 
         Room findRoom = roomRepository.findById(roomId).get();
 
-        Player joinPlayer = playerRepository.save(Player.builder()
-                .nickName(nickName)
-                .room(findRoom)
-                .isManager(playerRepository.existsByRoomIdAndIsManager(roomId) ? RoomManager.NORMAL.getValue() : RoomManager.MANAGER.getValue())
-                .build());
+        boolean isExistsUuid = playerRepository.existsByUuid(uuid);
+        Player joinPlayer = null;
+        if(!isExistsUuid) {
+            joinPlayer = playerRepository.save(Player.builder()
+                    .uuid(uuid)
+                    .room(findRoom)
+                    .createdAt(LocalDateTime.now())
+                    .isManager(playerRepository.existsByRoomIdAndIsManager(roomId) ? RoomManager.NORMAL.getValue() : RoomManager.MANAGER.getValue())
+                    .build());
+        }
+
+        if(isExistsUuid){
+            playerRepository.updateIsManager(uuid, playerRepository.existsByRoomIdAndIsManager(roomId) ? RoomManager.NORMAL.getValue() : RoomManager.MANAGER.getValue());
+            joinPlayer = playerRepository.findPlayerByUuid(uuid);
+        }
 
         RoomPlayerInfo roomPlayerInfo = RoomPlayerInfo.builder().targetNumber(findRoom.getTargetNumber())
                 .diceCount(findRoom.getDiceCount())
                 .playerId(joinPlayer.getId())
                 .isRoomMaster(joinPlayer.getIsManager())
-                .nickName(joinPlayer.getNickName())
+                .uuid(joinPlayer.getUuid())
                 .roomId(findRoom.getId())
                 .maxPlayer(findRoom.getMaxPlayers())
                 .entryCode(findRoom.getEntryCode().isBlank() ? "-1" : findRoom.getEntryCode())

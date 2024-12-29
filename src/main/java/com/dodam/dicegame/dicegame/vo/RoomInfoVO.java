@@ -15,5 +15,5 @@ public class RoomInfoVO {
     int diceCount;
     RoomType roomType;
     String entryCode;
-    String nickName;
+    String uuid;
 }

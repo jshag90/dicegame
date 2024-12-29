@@ -12,7 +12,7 @@ public class RoomPlayerInfo {
     int targetNumber;
     int diceCount;
     Long playerId;
-    String nickName;
+    String uuid;
     Long roomId;
     int maxPlayer;
     String entryCode;

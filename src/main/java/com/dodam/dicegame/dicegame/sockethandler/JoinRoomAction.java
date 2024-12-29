@@ -33,7 +33,7 @@ public class JoinRoomAction implements BroadcastByActionType{
         webSocketRoomService.addSessionToRoom(socketPayloadVO.getRoomId(), session.getId(), session);
         ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                 .action(socketPayloadVO.getAction())
-                .message(socketPayloadVO.getNickName() + "님이 입장하였습니다.")
+                .message(socketPayloadVO.getUuid().substring(9, 13) + "님이 입장하였습니다.")
                 .build();
 
         //닉네임 중복 사용자가 있는 지

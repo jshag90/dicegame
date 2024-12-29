@@ -10,7 +10,7 @@ import lombok.*;
 public class SocketPayloadVO {
     String action;
     String roomId;
-    String nickName;
+    String uuid;
     String isGo;
   /*  String round;
     String isGo;*/

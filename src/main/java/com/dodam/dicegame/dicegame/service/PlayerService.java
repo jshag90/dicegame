@@ -38,8 +38,8 @@ public class PlayerService {
     }
 
     @Transactional
-    public void deletePlayerInRoom(Long roomId, String nickName) {
-        Long findPlayerId = playerRepository.findIdByRoomIdAndNickName(roomId, nickName);
+    public void deletePlayerInRoom(Long roomId, String uuid) {
+        Long findPlayerId = playerRepository.findIdByRoomIdAndUuid(roomId, uuid);
         if (findPlayerId != null)
             playerRepository.deleteById(findPlayerId);
 

@@ -43,16 +43,10 @@ public class RoomController {
     public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinSecretRoomPlayer(
             @RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
         Room findRoom = roomService.checkSecretRoomPlayer(joinRoomPlayerVO);
-        if (roomService.isAlreadyUsedNickName(findRoom, joinRoomPlayerVO.getNickName())) {
-            return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
-                    .returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue())
-                    .data(roomService.handleJoinRoomPlayer(findRoom.getId(), joinRoomPlayerVO.getNickName()))
-                    .build());
-        }
 
         return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())
-                .data(roomService.handleJoinRoomPlayer(findRoom.getId(), joinRoomPlayerVO.getNickName()))
+                .data(roomService.handleJoinRoomPlayer(findRoom.getId(), joinRoomPlayerVO.getUuid()))
                 .build());
     }
 
