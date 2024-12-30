@@ -32,6 +32,12 @@ public class ScoreService {
     private final Map<Long, CountDownLatch> latchMap = new ConcurrentHashMap<>();
     private final AtomicBoolean isSaving = new AtomicBoolean(false);
 
+    Map<Integer, Integer> rankToScoreMap = Map.of(
+            1, 5,
+            2, 3,
+            3, 2
+    );
+
     public void saveScore(SaveScoreVO saveScoreVO) {
 
         if (roomRepository.findById(saveScoreVO.getRoomId()).isPresent()) {
@@ -88,6 +94,8 @@ public class ScoreService {
         return scoreResultsList;
     }
 
+
+
     /**
      * ScoreResults를 targetNumber와 score 차이에 따라 정렬합니다.
      */
@@ -118,8 +126,17 @@ public class ScoreService {
      */
     private void assignRanks(List<ScoreResults> scoreResultsList) {
         for (int i = 0; i < scoreResultsList.size(); i++) {
-            scoreResultsList.get(i).setRank(i + 1); // 1부터 시작하는 순위 설정
+            int rank = i + 1;
+            scoreResultsList.get(i).setRank(rank); // 1부터 시작하는 순위 설정
+
+            int plusScore = rankToScoreMap.getOrDefault(rank, -1);
+            scoreResultsList.get(i).setPlusTotalScore(plusScore);
+            updateTotalScore(scoreResultsList.get(i).getUuid(), plusScore);
         }
+    }
+
+    private void updateTotalScore(String uuid, Integer plusScore) {
+        playerRepository.incrementTotalScoreByUuid(uuid, plusScore);
     }
 
 

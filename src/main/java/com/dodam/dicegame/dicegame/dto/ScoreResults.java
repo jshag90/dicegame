@@ -11,6 +11,7 @@ import lombok.*;
 public class ScoreResults {
     Integer rank;
     Integer score;
+    Integer plusTotalScore;
     String uuid;
     Integer roomId;
     Integer targetNumber;
