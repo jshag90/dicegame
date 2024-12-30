@@ -18,19 +18,9 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("SELECT p.room FROM Player p WHERE p.id = :playerId")
     Room findRoomByPlayerId(@Param("playerId") Long playerId);
 
-    @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room = :room AND p.nickName = :nickName")
-    boolean isNickNameDuplicate(@Param("room") Room room, @Param("nickName") String nickName);
-
-    @Query("UPDATE Player p SET p.nickName = :nickName WHERE p.id = :playerId")
-    @Modifying
-    void updateNickNameById(@Param("playerId") Long playerId, @Param("nickName") String nickName);
-
     @Modifying
     @Query("UPDATE Player p SET p.isManager = :isManager WHERE p.id = :playerId")
     void updateIsMasterById(@Param("playerId") Long playerId, @Param("isManager") String isManager);
-
-    @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.id = :playerId AND p.nickName = :nickName")
-    boolean existsByIdAndNickName(@Param("playerId") Long playerId, @Param("nickName") String nickName);
 
     @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.uuid = :uuid")
     boolean existsByUuid(@Param("uuid") String uuid);
@@ -56,13 +46,21 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room.id = :roomId AND p.isManager = 'Y'")
     boolean existsByRoomIdAndIsManager(@Param("roomId") Long roomId);
 
-    @Query("SELECT CASE WHEN COUNT(p.nickName) > 1 THEN true ELSE false END " +
+   /* @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room = :room AND p.nickName = :nickName")
+    boolean isNickNameDuplicate(@Param("room") Room room, @Param("nickName") String nickName);*/
+
+    /*@Query("UPDATE Player p SET p.nickName = :nickName WHERE p.id = :playerId")
+    @Modifying
+    void updateNickNameById(@Param("playerId") Long playerId, @Param("nickName") String nickName);*/
+
+/*    @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.id = :playerId AND p.nickName = :nickName")
+    boolean existsByIdAndNickName(@Param("playerId") Long playerId, @Param("nickName") String nickName);*/
+
+/*    @Query("SELECT CASE WHEN COUNT(p.nickName) > 1 THEN true ELSE false END " +
             "FROM Player p " +
             "WHERE p.room.id = :roomId " +
             "GROUP BY p.nickName " +
             "HAVING COUNT(p.nickName) > 1")
-    Optional<Boolean> existsDuplicateNickNameInRoom(@Param("roomId") Long roomId);
-
-
+    Optional<Boolean> existsDuplicateNickNameInRoom(@Param("roomId") Long roomId);*/
 
 }

@@ -25,16 +25,16 @@ public class PlayerService {
     @Transactional
     public void updatePlayerNickName(Long playerId, String nickName) throws SameAlreadyNickNamePlayerException, SameNickNamePlayerException {
 
-        if (playerRepository.existsByIdAndNickName(playerId, nickName)) {
+      /*  if (playerRepository.existsByIdAndNickName(playerId, nickName)) {
             throw new SameAlreadyNickNamePlayerException("동일한 닉네임으로 닉네임을 변경할 수 없습니다.");
-        }
+        }*/
 
-        Room plyerIdRoom = playerRepository.findRoomByPlayerId(playerId);
+       /* Room plyerIdRoom = playerRepository.findRoomByPlayerId(playerId);
         if (playerRepository.isNickNameDuplicate(plyerIdRoom, nickName)) {
             throw new SameNickNamePlayerException("닉네임이 중복됩니다.");
-        }
+        }*/
 
-        playerRepository.updateNickNameById(playerId, nickName);
+      /*  playerRepository.updateNickNameById(playerId, nickName);*/
     }
 
     @Transactional

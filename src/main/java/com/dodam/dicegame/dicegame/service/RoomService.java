@@ -82,7 +82,8 @@ public class RoomService {
     }
 
     public boolean isAlreadyUsedNickName(Room findPublicRoom, String nickName) {
-        return playerRepository.isNickNameDuplicate(findPublicRoom, nickName);
+       /* return playerRepository.isNickNameDuplicate(findPublicRoom, nickName);*/
+        return true;
     }
 
 
