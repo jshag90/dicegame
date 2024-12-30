@@ -50,20 +50,14 @@ public class RoomController {
                 .build());
     }
 
-    @GetMapping("/public/join/nick-name={nickName}")
+    @GetMapping("/public/join/uuid={uuid}")
     @Operation(summary = "공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
-    public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinPublicRoomPlayer(@PathVariable("nickName") String nickName) throws NoExistRoomException, SameNickNamePlayerException {
+    public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinPublicRoomPlayer(@PathVariable("uuid") String uuid) throws NoExistRoomException {
         Room findRoom = roomService.checkJoinPublicRoomPlayer();
-        if (roomService.isAlreadyUsedNickName(findRoom, nickName)) {
-            return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
-                    .returnCode(ReturnCode.ALREADY_USED_NICK_NAME.getValue())
-                    .data(roomService.handleJoinRoomPlayer(findRoom.getId(), nickName))
-                    .build());
-        }
 
         return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())
-                .data(roomService.handleJoinRoomPlayer(findRoom.getId(), nickName))
+                .data(roomService.handleJoinRoomPlayer(findRoom.getId(), uuid))
                 .build());
     }
 

@@ -21,6 +21,20 @@ public class PlayerService {
     private final RoomRepository roomRepository;
     private final ScoreRepository scoreRepository;
 
+    @Transactional
+    public void deletePlayerInRoom(Long roomId, String uuid) {
+        Long findPlayerId = playerRepository.findIdByRoomIdAndUuid(roomId, uuid);
+        if (findPlayerId != null)
+            playerRepository.updateRoomIdNullByPlayerId(findPlayerId);
+
+        if(roomRepository.findById(roomId).isPresent()) {
+            Room findRoom = roomRepository.findById(roomId).get();
+            if (playerRepository.countByRoom(findRoom) == 0) {
+                scoreRepository.deleteByRoom(findRoom);
+                roomRepository.deleteById(roomId);
+            }
+        }
+    }
 
     @Transactional
     public void updatePlayerNickName(Long playerId, String nickName) throws SameAlreadyNickNamePlayerException, SameNickNamePlayerException {
@@ -37,18 +51,5 @@ public class PlayerService {
       /*  playerRepository.updateNickNameById(playerId, nickName);*/
     }
 
-    @Transactional
-    public void deletePlayerInRoom(Long roomId, String uuid) {
-        Long findPlayerId = playerRepository.findIdByRoomIdAndUuid(roomId, uuid);
-        if (findPlayerId != null)
-            playerRepository.deleteById(findPlayerId);
 
-        if(roomRepository.findById(roomId).isPresent()) {
-            Room findRoom = roomRepository.findById(roomId).get();
-            if (playerRepository.countByRoom(findRoom) == 0) {
-                scoreRepository.deleteByRoom(findRoom);
-                roomRepository.deleteById(roomId);
-            }
-        }
-    }
 }

@@ -2,6 +2,8 @@ package com.dodam.dicegame.dicegame.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +28,11 @@ public class Player {
     private String isManager;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "room_id", nullable = true, foreignKey = @ForeignKey(name = "fk_player_room"))
     private Room room;
+
+    @Column(name = "total_score", nullable = false, columnDefinition = "INT(6) DEFAULT 0")
+    private int totalScore;
 
 }

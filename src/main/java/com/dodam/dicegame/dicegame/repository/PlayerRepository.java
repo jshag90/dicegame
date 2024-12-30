@@ -19,6 +19,10 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     Room findRoomByPlayerId(@Param("playerId") Long playerId);
 
     @Modifying
+    @Query("UPDATE Player p SET p.room = NULL WHERE p.id = :playerId")
+    void updateRoomIdNullByPlayerId(@Param("playerId") Long playerId);
+
+    @Modifying
     @Query("UPDATE Player p SET p.isManager = :isManager WHERE p.id = :playerId")
     void updateIsMasterById(@Param("playerId") Long playerId, @Param("isManager") String isManager);
 
@@ -31,6 +35,10 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("UPDATE Player p SET p.isManager = :isManager WHERE p.uuid = :uuid")
     @Modifying
     void updateIsManager(@Param("uuid") String uuid, @Param("isManager") String isManager);
+
+    @Query("UPDATE Player p SET p.room.id = :roomId WHERE p.uuid = :uuid")
+    @Modifying
+    void updateRoomId(@Param("uuid") String uuid, @Param("roomId") Long roomId);
 
     @Query("SELECT p.id FROM Player p WHERE p.room.id = :roomId AND p.uuid = :uuid")
     Long findIdByRoomIdAndUuid(Long roomId, String uuid);

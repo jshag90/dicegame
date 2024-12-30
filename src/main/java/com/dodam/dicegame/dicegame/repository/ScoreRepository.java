@@ -13,7 +13,7 @@ import java.util.List;
 public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Score> findByRoom(Room room);
 
-    boolean existsByNickNameAndRoomId(String nickName, Long roomId);
+    boolean existsByUuidAndRoomId(String uuid, Long roomId);
 
     void deleteByRoom(Room room);
 }

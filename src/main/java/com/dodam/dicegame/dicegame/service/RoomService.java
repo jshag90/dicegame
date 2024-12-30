@@ -31,6 +31,7 @@ public class RoomService {
 
     private final PlayerRepository playerRepository;
 
+    @Transactional
     public Long createRoom(RoomInfoVO roomInfoVO) {
         Room saveRoom = roomRepository.save(Room.builder()
                 .diceCount(roomInfoVO.getDiceCount())
@@ -46,6 +47,7 @@ public class RoomService {
         boolean isExistsUuid = playerRepository.existsByUuid(roomInfoVO.getUuid());
         if (isExistsUuid) {
             playerRepository.updateIsManager(roomInfoVO.getUuid(), RoomManager.MANAGER.getValue());
+            playerRepository.updateRoomId(roomInfoVO.getUuid(), saveRoom.getId());
         }
 
         if (!isExistsUuid) {
@@ -81,8 +83,12 @@ public class RoomService {
                 .orElseThrow(() -> new NoExistRoomException("공개방이 존재하지 않습니다."));
     }
 
+
+
+
+
     public boolean isAlreadyUsedNickName(Room findPublicRoom, String nickName) {
-       /* return playerRepository.isNickNameDuplicate(findPublicRoom, nickName);*/
+        /* return playerRepository.isNickNameDuplicate(findPublicRoom, nickName);*/
         return true;
     }
 
@@ -94,7 +100,7 @@ public class RoomService {
 
         boolean isExistsUuid = playerRepository.existsByUuid(uuid);
         Player joinPlayer = null;
-        if(!isExistsUuid) {
+        if (!isExistsUuid) {
             joinPlayer = playerRepository.save(Player.builder()
                     .uuid(uuid)
                     .room(findRoom)
@@ -103,8 +109,9 @@ public class RoomService {
                     .build());
         }
 
-        if(isExistsUuid){
+        if (isExistsUuid) {
             playerRepository.updateIsManager(uuid, playerRepository.existsByRoomIdAndIsManager(roomId) ? RoomManager.NORMAL.getValue() : RoomManager.MANAGER.getValue());
+            playerRepository.updateRoomId(uuid, findRoom.getId());
             joinPlayer = playerRepository.findPlayerByUuid(uuid);
         }
 

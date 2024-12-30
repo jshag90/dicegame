@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public class SaveScoreVO {
     Long roomId;
-    String nickName;
+    String uuid;
     Integer finalRound;
     Integer score;
 }

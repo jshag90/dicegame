@@ -38,12 +38,12 @@ public class ScoreService {
 
             Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
             if (isSaving.compareAndSet(false, true)) {
-                if (!scoreRepository.existsByNickNameAndRoomId(saveScoreVO.getNickName(), findRoom.getId()) && saveScoreVO.getScore() > 0) {
+                if (!scoreRepository.existsByUuidAndRoomId(saveScoreVO.getUuid(), findRoom.getId()) && saveScoreVO.getScore() > 0) {
                     scoreRepository.save(
                             Score.builder()
                                     .score(saveScoreVO.getScore())
                                     .room(findRoom)
-                                    .nickName(saveScoreVO.getNickName())
+                                    .uuid(saveScoreVO.getUuid())
                                     .finalRound(saveScoreVO.getFinalRound())
                                     .build()
                     );
@@ -74,7 +74,7 @@ public class ScoreService {
         List<ScoreResults> scoreResultsList = new ArrayList<>();
         for (Score score : findScore) {
             scoreResultsList.add(ScoreResults.builder()
-                    .nickName(score.getNickName())
+                    .uuid(score.getUuid())
                     .score(score.getScore())
                     .roomId(roomId.intValue())
                     .targetNumber(targetNumber)
