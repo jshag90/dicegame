@@ -1,15 +1,19 @@
 package com.dodam.dicegame.dicegame.service;
 
+import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.exception.SameAlreadyNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.SameNickNamePlayerException;
 import com.dodam.dicegame.dicegame.repository.PlayerRepository;
 import com.dodam.dicegame.dicegame.repository.RoomRepository;
 import com.dodam.dicegame.dicegame.repository.ScoreRepository;
+import com.dodam.dicegame.dicegame.util.RoomManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +31,7 @@ public class PlayerService {
         if (findPlayerId != null)
             playerRepository.updateRoomIdNullByPlayerId(findPlayerId);
 
-        if(roomRepository.findById(roomId).isPresent()) {
+        if (roomRepository.findById(roomId).isPresent()) {
             Room findRoom = roomRepository.findById(roomId).get();
             if (playerRepository.countByRoom(findRoom) == 0) {
                 scoreRepository.deleteByRoom(findRoom);
@@ -48,8 +52,17 @@ public class PlayerService {
             throw new SameNickNamePlayerException("닉네임이 중복됩니다.");
         }*/
 
-      /*  playerRepository.updateNickNameById(playerId, nickName);*/
+        /*  playerRepository.updateNickNameById(playerId, nickName);*/
     }
 
 
+    public void savePlayerUuid(String uuid) {
+        if (!playerRepository.existsByUuid(uuid)) {
+            playerRepository.save(Player.builder()
+                    .isManager(RoomManager.NORMAL.getValue())
+                    .uuid(uuid)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+    }
 }

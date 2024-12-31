@@ -22,6 +22,19 @@ public class PlayerController {
 
     private final PlayerService playerService;
 
+    @GetMapping("/save/uuid={uuid}")
+    @Operation(summary = "UUID 등록", description = "UUID를 등록합니다.")
+    public ResponseEntity<ReturnCodeVO<Void>> deletePlayerInRoom(@PathVariable("uuid") String uuid){
+        log.info("/save/uuid={}", uuid);
+
+        playerService.savePlayerUuid(uuid);
+
+        return ResponseEntity.ok(ReturnCodeVO.<Void>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .build());
+    }
+
+
     @DeleteMapping("/delete/in-room/{roomId}/{uuid}")
     @Operation(summary = "플레이어를 방에서 제거", description = "플레이어를 방에서 제거합니다.")
     public ResponseEntity<ReturnCodeVO<Void>> deletePlayerInRoom(
