@@ -40,6 +40,16 @@ public class PlayerService {
         }
     }
 
+    public void savePlayerUuid(String uuid) {
+        if (!playerRepository.existsByUuid(uuid)) {
+            playerRepository.save(Player.builder()
+                    .isManager(RoomManager.NORMAL.getValue())
+                    .uuid(uuid)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+    }
+
     @Transactional
     public void updatePlayerNickName(Long playerId, String nickName) throws SameAlreadyNickNamePlayerException, SameNickNamePlayerException {
 
@@ -55,14 +65,4 @@ public class PlayerService {
         /*  playerRepository.updateNickNameById(playerId, nickName);*/
     }
 
-
-    public void savePlayerUuid(String uuid) {
-        if (!playerRepository.existsByUuid(uuid)) {
-            playerRepository.save(Player.builder()
-                    .isManager(RoomManager.NORMAL.getValue())
-                    .uuid(uuid)
-                    .createdAt(LocalDateTime.now())
-                    .build());
-        }
-    }
 }

@@ -12,6 +12,7 @@ import com.dodam.dicegame.dicegame.vo.SaveScoreVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +68,7 @@ public class ScoreService {
 
     }
 
+    @Transactional
     public List<ScoreResults> getGameScoreResults(Long roomId) throws NoExistRoomException, InterruptedException {
         Optional<Room> findRoom = roomRepository.findById(roomId);
         if (findRoom.isEmpty()) {
@@ -89,11 +91,22 @@ public class ScoreService {
 
         // 정렬 및 순위 설정
         sortScoreResults(scoreResultsList);
-        assignRanks(scoreResultsList);
+
+
+        int rank = 1;
+        for (ScoreResults scoreResult : scoreResultsList) {
+            int plusScore = rankToScoreMap.getOrDefault(rank, -1);
+            scoreResult.setRank(rank);
+            scoreResult.setPlusTotalScore(plusScore);
+
+            playerRepository.incrementTotalScoreByUuid(scoreResult.getUuid(), plusScore);
+            rank++;
+        }
+
+
         log.info("scoreResultsList() {}", scoreResultsList);
         return scoreResultsList;
     }
-
 
 
     /**
@@ -120,24 +133,5 @@ public class ScoreService {
             return Integer.compare(Math.abs(diff1), Math.abs(diff2));
         });
     }
-
-    /**
-     * ScoreResults에 순위를 할당합니다.
-     */
-    private void assignRanks(List<ScoreResults> scoreResultsList) {
-        for (int i = 0; i < scoreResultsList.size(); i++) {
-            int rank = i + 1;
-            scoreResultsList.get(i).setRank(rank); // 1부터 시작하는 순위 설정
-
-            int plusScore = rankToScoreMap.getOrDefault(rank, -1);
-            scoreResultsList.get(i).setPlusTotalScore(plusScore);
-            updateTotalScore(scoreResultsList.get(i).getUuid(), plusScore);
-        }
-    }
-
-    private void updateTotalScore(String uuid, Integer plusScore) {
-        playerRepository.incrementTotalScoreByUuid(uuid, plusScore);
-    }
-
 
 }

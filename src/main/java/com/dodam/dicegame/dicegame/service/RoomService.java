@@ -84,15 +84,6 @@ public class RoomService {
     }
 
 
-
-
-
-    public boolean isAlreadyUsedNickName(Room findPublicRoom, String nickName) {
-        /* return playerRepository.isNickNameDuplicate(findPublicRoom, nickName);*/
-        return true;
-    }
-
-
     @Transactional
     public RoomPlayerInfo handleJoinRoomPlayer(Long roomId, String uuid) {
 
@@ -143,11 +134,9 @@ public class RoomService {
 
     public RoomSettingInfoVO getRoomSettingInfo(Long roomId) throws NoExistRoomException {
         Optional<Room> findRoom = roomRepository.findById(roomId);
-
-        if (!findRoom.isPresent()) {
+        if (findRoom.isEmpty()) {
             throw new NoExistRoomException("올바른 방 정보가 아님");
         }
-
 
         Room getRoom = findRoom.get();
         return RoomSettingInfoVO.builder().roomType(getRoom.getRoomType())

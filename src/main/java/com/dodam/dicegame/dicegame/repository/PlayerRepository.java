@@ -57,10 +57,10 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room.id = :roomId AND p.isManager = 'Y'")
     boolean existsByRoomIdAndIsManager(@Param("roomId") Long roomId);
 
-    @Modifying
-    @Query("UPDATE Player p SET p.totalScore = p.totalScore + :plusScore WHERE p.uuid = :uuid")
-    int incrementTotalScoreByUuid(@Param("uuid") String uuid, @Param("plusScore") int plusScore);
 
+    @Query("UPDATE Player p SET p.totalScore = p.totalScore + :plusScore WHERE p.uuid = :uuid")
+    @Modifying
+    void incrementTotalScoreByUuid(@Param("uuid") String uuid, @Param("plusScore") int plusScore);
 
    /* @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room = :room AND p.nickName = :nickName")
     boolean isNickNameDuplicate(@Param("room") Room room, @Param("nickName") String nickName);*/

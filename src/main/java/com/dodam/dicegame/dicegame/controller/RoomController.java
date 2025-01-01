@@ -43,7 +43,6 @@ public class RoomController {
     public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinSecretRoomPlayer(
             @RequestBody JoinRoomPlayerVO joinRoomPlayerVO) throws TooManyPlayerException, NoExistRoomException, SameNickNamePlayerException {
         Room findRoom = roomService.checkSecretRoomPlayer(joinRoomPlayerVO);
-
         return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())
                 .data(roomService.handleJoinRoomPlayer(findRoom.getId(), joinRoomPlayerVO.getUuid()))
@@ -54,7 +53,6 @@ public class RoomController {
     @Operation(summary = "공개방 입장하기", description = "방에 들어가기 위한 사용자를 저장합니다.")
     public ResponseEntity<ReturnCodeVO<RoomPlayerInfo>> joinPublicRoomPlayer(@PathVariable("uuid") String uuid) throws NoExistRoomException {
         Room findRoom = roomService.checkJoinPublicRoomPlayer();
-
         return ResponseEntity.ok(ReturnCodeVO.<RoomPlayerInfo>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())
                 .data(roomService.handleJoinRoomPlayer(findRoom.getId(), uuid))

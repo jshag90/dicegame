@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Collections;
@@ -32,6 +33,7 @@ public class PlayGameAction implements BroadcastByActionType {
     }
 
     @Override
+    @Transactional
     public void broadcastToClient(WebSocketSession session, SocketPayloadVO socketPayloadVO) {
         webSocketRoomService.roomIdPlayDoneMap.computeIfAbsent(socketPayloadVO.getRoomId(), k -> ConcurrentHashMap.newKeySet()).add(session.getId());
 
