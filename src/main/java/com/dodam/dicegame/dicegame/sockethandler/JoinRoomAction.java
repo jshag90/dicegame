@@ -30,7 +30,7 @@ public class JoinRoomAction implements BroadcastByActionType{
 
     @Override
     public void broadcastToClient(WebSocketSession session, SocketPayloadVO socketPayloadVO) {
-        webSocketRoomService.addSessionToRoom(socketPayloadVO.getRoomId(), session.getId(), session);
+        webSocketRoomService.addSessionToRoom(socketPayloadVO.getRoomId(), session.getId(), socketPayloadVO.getUuid(), session);
         ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                 .action(socketPayloadVO.getAction())
                 .message(socketPayloadVO.getUuid().substring(9, 13) + "님이 입장하였습니다.")

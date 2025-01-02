@@ -35,23 +35,17 @@ public class PlayGameAction implements BroadcastByActionType {
     @Override
     @Transactional
     public void broadcastToClient(WebSocketSession session, SocketPayloadVO socketPayloadVO) {
-        webSocketRoomService.roomIdPlayDoneMap.computeIfAbsent(socketPayloadVO.getRoomId(), k -> ConcurrentHashMap.newKeySet()).add(session.getId());
+        webSocketRoomService.putRoomPlayDone(socketPayloadVO.getRoomId(), session.getId());
 
-        Set<String> roomAllSession = Optional.ofNullable(webSocketRoomService.roomIdSessionIdMap.get(socketPayloadVO.getRoomId())).orElse(Collections.emptySet());
-        Set<String> roomPlayDoneSession = Optional.ofNullable(webSocketRoomService.roomIdPlayDoneMap.get(socketPayloadVO.getRoomId())).orElse(Collections.emptySet());
+        Set<String> roomAllSession = webSocketRoomService.getSessionsInRoom(socketPayloadVO.getRoomId());
+        Set<String> roomPlayDoneSession = webSocketRoomService.getPlayDoneSessionInRoom(socketPayloadVO.getRoomId());
 
         //플레이어가 stop을 선택했을 경우
         if (socketPayloadVO.getIsGo().equals("N")) {
-            putRoomIdStopCountMap(socketPayloadVO, session );
+            webSocketRoomService.putRoomIdStopCountMap(socketPayloadVO.getRoomId(), session.getId());
         }
 
-        int roomStopCount = webSocketRoomService.roomIdStopSessionIdMap.get(socketPayloadVO.getRoomId()) == null ? 0 : webSocketRoomService.roomIdStopSessionIdMap.get(socketPayloadVO.getRoomId()).size();
-
-        int roomAllSessionSize = roomAllSession.size() - roomStopCount;
-        log.info("roomAllSessionSize {}", roomAllSessionSize);
-        log.info("roomStopCount {}", roomStopCount);
-        String playDoneMessage = roomAllSessionSize <= roomPlayDoneSession.size() ? "done" : "wait";
-        playDoneMessage = roomAllSession.size() <= roomStopCount ? "end" : playDoneMessage;
+        String playDoneMessage = webSocketRoomService.getPlayDoneMessage(socketPayloadVO.getRoomId(), roomAllSession, roomPlayDoneSession, false);
 
         ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                 .action(socketPayloadVO.getAction())
@@ -68,12 +62,5 @@ public class PlayGameAction implements BroadcastByActionType {
         roomRepository.updateUpdatedAt(Long.valueOf(socketPayloadVO.getRoomId()));
     }
 
-
-    private void putRoomIdStopCountMap(SocketPayloadVO socketPayloadVO, WebSocketSession session) {
-        webSocketRoomService.roomIdStopSessionIdMap
-                .computeIfAbsent(socketPayloadVO.getRoomId(), key -> ConcurrentHashMap.newKeySet())
-                .add(session.getId());
-        log.info("putRoomIdStopCountMap() {}", webSocketRoomService.roomIdStopSessionIdMap);
-    }
 
 }

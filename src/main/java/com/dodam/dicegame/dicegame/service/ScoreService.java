@@ -30,7 +30,7 @@ public class ScoreService {
     private final RoomRepository roomRepository;
     private final ScoreRepository scoreRepository;
     private final PlayerRepository playerRepository;
-    private final Map<Long, CountDownLatch> latchMap = new ConcurrentHashMap<>();
+    public static final Map<Long, CountDownLatch> latchMap = new ConcurrentHashMap<>();
     private final AtomicBoolean isSaving = new AtomicBoolean(false);
 
     Map<Integer, Integer> rankToScoreMap = Map.of(
@@ -39,6 +39,7 @@ public class ScoreService {
             3, 2
     );
 
+    @Transactional
     public void saveScore(SaveScoreVO saveScoreVO) {
 
         if (roomRepository.findById(saveScoreVO.getRoomId()).isPresent()) {
@@ -55,6 +56,11 @@ public class ScoreService {
                                     .build()
                     );
                 }
+
+                if (scoreRepository.existsByUuidAndRoomId(saveScoreVO.getUuid(), findRoom.getId()) && saveScoreVO.getScore() > 0) {
+                    scoreRepository.updateScoreAndRound(findRoom.getId(), saveScoreVO.getUuid(), saveScoreVO.getFinalRound(), saveScoreVO.getScore());
+                }
+
                 isSaving.set(false);
             }
 
@@ -76,6 +82,7 @@ public class ScoreService {
         }
 
         latchMap.get(roomId).await();
+
         List<Score> findScore = scoreRepository.findByRoom(findRoom.get());
 
         int targetNumber = findRoom.get().getTargetNumber();
