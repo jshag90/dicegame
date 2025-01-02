@@ -45,16 +45,14 @@ public class WebSocketRoomService {
         return Optional.ofNullable(roomIdPlayDoneMap.get(roomId)).orElse(Collections.emptySet());
     }
 
-    public String getRoomIdBySessionId(String sessionId){
+    public String getRoomIdBySessionId(String sessionId) {
         log.info("getRoomIdBySessionId() {}", sessionId);
-        String roomId = "";
-        for (Map.Entry<String, Set<String>> entry : roomIdSessionIdMap.entrySet()) {
-            if (entry.getValue().contains(sessionId)) {
-                roomId = entry.getKey();
-                break;
-            }
-        }
-        return roomId;
+        return roomIdSessionIdMap.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().contains(sessionId))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse("");
     }
 
     public Integer getRoomMembersCount(String roomId) {
@@ -89,12 +87,15 @@ public class WebSocketRoomService {
         roomIdPlayDoneMap.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
     }
 
-    public String getPlayDoneMessage(String roomId, Set<String> roomAllSession, Set<String> roomPlayDoneSession, boolean isForceExit) {
+    public String getPlayDoneMessage(String roomId, boolean isForceExit) {
+        Set<String> roomAllSession = getSessionsInRoom(roomId);
+        Set<String> roomPlayDoneSession = getPlayDoneSessionInRoom(roomId);
+
         int stopSessionCount = getRoomStopCount(roomId);
         int goSessionCount = roomAllSession.size() - stopSessionCount;
 
         // 모든 세션이 중지된 경우 또는 중지되지 않은 세션이 2명 미만인 경우
-        if (roomAllSession.size() <= stopSessionCount || (isForceExit&&goSessionCount < 2)) {
+        if (roomAllSession.size() <= stopSessionCount || (isForceExit && goSessionCount < 2)) {
             return "end";
         }
 

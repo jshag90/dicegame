@@ -75,8 +75,8 @@ public class RoomService {
 
     /**
      * 예외 정책에 통과하면 찾은 방번호 return
-     *
      * @return
+     * @throws NoExistRoomException
      */
     public Room checkJoinPublicRoomPlayer() throws NoExistRoomException {
         return roomRepository.findAvailableMaxPlayerPublicRoom(RoomType.PUBLIC.getValue(), PageRequest.of(0, 1))
@@ -90,19 +90,20 @@ public class RoomService {
         Room findRoom = roomRepository.findById(roomId).get();
 
         boolean isExistsUuid = playerRepository.existsByUuid(uuid);
+        String isManager = playerRepository.existsByRoomIdAndIsManager(roomId) ? RoomManager.NORMAL.getValue() : RoomManager.MANAGER.getValue();
         Player joinPlayer = null;
         if (!isExistsUuid) {
             joinPlayer = playerRepository.save(Player.builder()
-                    .uuid(uuid)
-                    .room(findRoom)
-                    .createdAt(LocalDateTime.now())
-                    .isManager(playerRepository.existsByRoomIdAndIsManager(roomId) ? RoomManager.NORMAL.getValue() : RoomManager.MANAGER.getValue())
-                    .build());
+                                                     .uuid(uuid)
+                                                     .room(findRoom)
+                                                     .createdAt(LocalDateTime.now())
+                                                     .isManager(isManager)
+                                                     .build());
         }
 
         if (isExistsUuid) {
-            playerRepository.updateIsManager(uuid, playerRepository.existsByRoomIdAndIsManager(roomId) ? RoomManager.NORMAL.getValue() : RoomManager.MANAGER.getValue());
-            playerRepository.updateRoomId(uuid, findRoom.getId());
+            playerRepository.updateIsManager(uuid, isManager);
+            playerRepository.updateRoomId(uuid, roomId);
             joinPlayer = playerRepository.findPlayerByUuid(uuid);
         }
 

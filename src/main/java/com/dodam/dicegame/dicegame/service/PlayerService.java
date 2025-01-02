@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @Slf4j
 public class PlayerService {
 
-
     private final PlayerRepository playerRepository;
     private final RoomRepository roomRepository;
     private final ScoreRepository scoreRepository;
@@ -28,8 +27,9 @@ public class PlayerService {
     @Transactional
     public void deletePlayerInRoom(Long roomId, String uuid) {
         Long findPlayerId = playerRepository.findIdByRoomIdAndUuid(roomId, uuid);
-        if (findPlayerId != null)
+        if (findPlayerId != null) {
             playerRepository.updateRoomIdNullByPlayerId(findPlayerId);
+        }
 
         if (roomRepository.findById(roomId).isPresent()) {
             Room findRoom = roomRepository.findById(roomId).get();
@@ -48,21 +48,6 @@ public class PlayerService {
                     .createdAt(LocalDateTime.now())
                     .build());
         }
-    }
-
-    @Transactional
-    public void updatePlayerNickName(Long playerId, String nickName) throws SameAlreadyNickNamePlayerException, SameNickNamePlayerException {
-
-      /*  if (playerRepository.existsByIdAndNickName(playerId, nickName)) {
-            throw new SameAlreadyNickNamePlayerException("동일한 닉네임으로 닉네임을 변경할 수 없습니다.");
-        }*/
-
-       /* Room plyerIdRoom = playerRepository.findRoomByPlayerId(playerId);
-        if (playerRepository.isNickNameDuplicate(plyerIdRoom, nickName)) {
-            throw new SameNickNamePlayerException("닉네임이 중복됩니다.");
-        }*/
-
-        /*  playerRepository.updateNickNameById(playerId, nickName);*/
     }
 
 }

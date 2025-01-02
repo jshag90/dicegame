@@ -50,17 +50,4 @@ public class PlayerController {
                 .build());
     }
 
-    /*@PutMapping("/update/nick-name/{playerId}/{nickName}")
-    @Operation(summary = "플레이어 닉네임 변경", description = "플레이어의 닉네임을 변경합니다.")
-    public ResponseEntity<ReturnCodeVO<Void>> updateNickName(
-            @PathVariable("playerId") Long playerId,
-            @PathVariable("nickName") String nickName) throws SameAlreadyNickNamePlayerException, SameNickNamePlayerException {
-
-        playerService.updatePlayerNickName(playerId, nickName);
-
-        return ResponseEntity.ok(ReturnCodeVO.<Void>builder()
-                .returnCode(ReturnCode.SUCCESS.getValue())
-                .build());
-    }*/
-
 }

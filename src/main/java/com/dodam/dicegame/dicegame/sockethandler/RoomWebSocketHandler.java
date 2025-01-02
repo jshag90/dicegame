@@ -16,12 +16,11 @@ import com.dodam.dicegame.dicegame.service.WebSocketRoomService;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import static com.dodam.dicegame.dicegame.service.ScoreService.latchMap;
+import static com.dodam.dicegame.dicegame.service.ScoreService.allSaveScoreLatchMap;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -63,6 +62,7 @@ public class RoomWebSocketHandler extends TextWebSocketHandler {
         String closedUuid = webSocketRoomService.getUuidBySessionId(closedSession.getId());
         log.info("closedUuid : {}", closedUuid);
         log.info("나간 방번호 : {}", roomId);
+
         Optional<Room> findRoom = roomRepository.findById(Long.valueOf(roomId));
         boolean isGameStartedRoom = false;
         if (findRoom.isPresent()) {
@@ -71,20 +71,13 @@ public class RoomWebSocketHandler extends TextWebSocketHandler {
 
         if (isGameStartedRoom) {
             webSocketRoomService.putRoomPlayDone(roomId, closedSession.getId());
-
-            //해당 방의 전체 세션
-            Set<String> roomAllSession = webSocketRoomService.getSessionsInRoom(roomId);
-            //해당 방의 굴리기 or STOP 선택 세션
-            Set<String> roomPlayDoneSession = webSocketRoomService.getPlayDoneSessionInRoom(roomId);
-
             webSocketRoomService.putRoomIdStopCountMap(roomId, closedSession.getId());
 
-            String playDoneMessage = webSocketRoomService.getPlayDoneMessage(roomId, roomAllSession, roomPlayDoneSession, true);
-
+            Set<String> roomAllSession = webSocketRoomService.getSessionsInRoom(roomId);
             //게임 진행 여부 메시지 전달
             broadCastExceptClosedSession(closedSession, roomId, roomAllSession, ResponseSocketPayloadVO.builder()
                     .action("playGame")
-                    .message(playDoneMessage)
+                    .message(webSocketRoomService.getPlayDoneMessage(roomId, true))
                     .build());
 
             webSocketRoomService.removeSessionById(closedSession.getId());
@@ -92,16 +85,16 @@ public class RoomWebSocketHandler extends TextWebSocketHandler {
             SocketPayloadVO socketPayloadVO = SocketPayloadVO.builder().action("getRoomsCount").roomId(roomId).build();
             getRoomsCountAction.broadcastToClient(closedSession, socketPayloadVO);
 
-            latchMap.putIfAbsent(Long.valueOf(roomId), new CountDownLatch(1));
-            latchMap.get(Long.valueOf(roomId)).countDown();
+            allSaveScoreLatchMap.putIfAbsent(Long.valueOf(roomId), new CountDownLatch(1));
+            allSaveScoreLatchMap.get(Long.valueOf(roomId)).countDown();
 
 
             //퇴장 메시지 전달
             broadCastExceptClosedSession(closedSession, roomId, roomAllSession, ResponseSocketPayloadVO.builder()
-                                                                                                        .action("leaveRoom")
-                                                                                                        .message(closedUuid.substring(1, 9))
-                                                                                                        .subMessage("ok")
-                                                                                                        .build());
+                    .action("leaveRoom")
+                    .message(closedUuid.substring(1, 9))
+                    .subMessage("ok")
+                    .build());
 
         }
 

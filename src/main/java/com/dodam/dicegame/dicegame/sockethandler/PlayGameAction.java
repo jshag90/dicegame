@@ -37,15 +37,12 @@ public class PlayGameAction implements BroadcastByActionType {
     public void broadcastToClient(WebSocketSession session, SocketPayloadVO socketPayloadVO) {
         webSocketRoomService.putRoomPlayDone(socketPayloadVO.getRoomId(), session.getId());
 
-        Set<String> roomAllSession = webSocketRoomService.getSessionsInRoom(socketPayloadVO.getRoomId());
-        Set<String> roomPlayDoneSession = webSocketRoomService.getPlayDoneSessionInRoom(socketPayloadVO.getRoomId());
-
         //플레이어가 stop을 선택했을 경우
         if (socketPayloadVO.getIsGo().equals("N")) {
             webSocketRoomService.putRoomIdStopCountMap(socketPayloadVO.getRoomId(), session.getId());
         }
 
-        String playDoneMessage = webSocketRoomService.getPlayDoneMessage(socketPayloadVO.getRoomId(), roomAllSession, roomPlayDoneSession, false);
+        String playDoneMessage = webSocketRoomService.getPlayDoneMessage(socketPayloadVO.getRoomId(),false);
 
         ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                 .action(socketPayloadVO.getAction())
