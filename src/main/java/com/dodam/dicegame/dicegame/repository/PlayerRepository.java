@@ -62,6 +62,8 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Modifying
     void incrementTotalScoreByUuid(@Param("uuid") String uuid, @Param("plusScore") int plusScore);
 
+    Player findByUuid(String uuid);
+
    /* @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room = :room AND p.nickName = :nickName")
     boolean isNickNameDuplicate(@Param("room") Room room, @Param("nickName") String nickName);*/
 

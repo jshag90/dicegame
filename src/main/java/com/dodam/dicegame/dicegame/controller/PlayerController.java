@@ -1,5 +1,6 @@
 package com.dodam.dicegame.dicegame.controller;
 
+import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.exception.SameAlreadyNickNamePlayerException;
 import com.dodam.dicegame.dicegame.exception.SameNickNamePlayerException;
 import com.dodam.dicegame.dicegame.service.PlayerService;
@@ -31,6 +32,16 @@ public class PlayerController {
 
         return ResponseEntity.ok(ReturnCodeVO.<Void>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())
+                .build());
+    }
+
+    @GetMapping("/info/uuid={uuid}")
+    @Operation(summary = "플레이어 정보 조회", description = "플레이어 정보를 조회합니다.")
+    public ResponseEntity<ReturnCodeVO<Player>> getPlayerInfoByUuid(@PathVariable("uuid") String uuid){
+        log.info("/info/uuid={}", uuid);
+        return ResponseEntity.ok(ReturnCodeVO.<Player>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(playerService.getPlayerInfoByUuid(uuid))
                 .build());
     }
 

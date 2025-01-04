@@ -50,4 +50,8 @@ public class PlayerService {
         }
     }
 
+    public Player getPlayerInfoByUuid(String uuid){
+        return playerRepository.findByUuid(uuid);
+    }
+
 }
