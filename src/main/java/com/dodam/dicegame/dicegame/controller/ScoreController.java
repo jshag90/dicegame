@@ -1,5 +1,6 @@
 package com.dodam.dicegame.dicegame.controller;
 
+import com.dodam.dicegame.dicegame.dto.Ranking;
 import com.dodam.dicegame.dicegame.dto.ScoreResults;
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
 import com.dodam.dicegame.dicegame.service.ScoreService;
@@ -7,13 +8,11 @@ import com.dodam.dicegame.dicegame.util.ReturnCode;
 import com.dodam.dicegame.dicegame.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -43,6 +42,16 @@ public class ScoreController {
         return ResponseEntity.ok(ReturnCodeVO.<List<ScoreResults>>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())
                 .data(scoreService.getGameScoreResults(roomId))
+                .build());
+    }
+
+    @GetMapping("/ranking")
+    @Operation(summary = "전체 랭킹 조회", description = "플레이어 전체 랭킹 상위 10명 조회")
+    public ResponseEntity<ReturnCodeVO<List<Ranking>>> getPlayerRanking() {
+        log.info("/ranking");
+        return ResponseEntity.ok(ReturnCodeVO.<List<Ranking>>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(scoreService.getRanking())
                 .build());
     }
 }

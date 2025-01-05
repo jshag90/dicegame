@@ -1,6 +1,8 @@
 package com.dodam.dicegame.dicegame.service;
 
+import com.dodam.dicegame.dicegame.dto.Ranking;
 import com.dodam.dicegame.dicegame.dto.ScoreResults;
+import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.entity.Score;
 import com.dodam.dicegame.dicegame.exception.NoExistRoomException;
@@ -11,9 +13,11 @@ import com.dodam.dicegame.dicegame.util.DataUtil;
 import com.dodam.dicegame.dicegame.vo.SaveScoreVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -111,4 +115,20 @@ public class ScoreService {
         return scoreResultsList;
     }
 
+    public List<Ranking> getRanking() {
+
+        int limit = 10;
+        List<Player> topTotalScoreUuid = playerRepository.findTopTotalScoreUuid(PageRequest.of(0, limit));
+
+        List<Ranking> rankingList = new ArrayList<>();
+        int rank = 1;
+        for (Player player : topTotalScoreUuid) {
+            rankingList.add(Ranking.builder()
+                    .rank(rank++)
+                    .totalScore(player.getTotalScore())
+                    .uuid(player.getUuid().substring(0,8))
+                    .build());
+        }
+        return rankingList;
+    }
 }

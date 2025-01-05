@@ -2,6 +2,7 @@ package com.dodam.dicegame.dicegame.repository;
 
 import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.entity.Room;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -63,6 +64,12 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     void incrementTotalScoreByUuid(@Param("uuid") String uuid, @Param("plusScore") int plusScore);
 
     Player findByUuid(String uuid);
+
+    @Query("SELECT p FROM Player p order by p.totalScore DESC")
+    List<Player> findTopTotalScoreUuid(Pageable pageable);
+
+
+
 
    /* @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.room = :room AND p.nickName = :nickName")
     boolean isNickNameDuplicate(@Param("room") Room room, @Param("nickName") String nickName);*/
