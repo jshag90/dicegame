@@ -41,7 +41,7 @@ public class ScoreService {
             2, 3,
             3, 2
     );
-    private final AtomicBoolean isSaving = new AtomicBoolean(false);
+    private final AtomicBoolean isSaveScore = new AtomicBoolean(false);
 
     Sort totalScoreSort = Sort.by(Sort.Order.desc("totalScore"), Sort.Order.desc("id"));
 
@@ -51,11 +51,11 @@ public class ScoreService {
         if (roomRepository.findById(saveScoreVO.getRoomId()).isPresent()) {
 
             Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
-            if (isSaving.compareAndSet(false, true)) {
+            if (isSaveScore.compareAndSet(false, true)) {
                 if (saveScoreVO.getScore() > 0) {
                     saveScoreByExistsScore(saveScoreVO, findRoom);
                 }
-                isSaving.set(false);
+                isSaveScore.set(false);
             }
 
             allSaveScoreLatchMap.putIfAbsent(saveScoreVO.getRoomId(), new CountDownLatch(1));
