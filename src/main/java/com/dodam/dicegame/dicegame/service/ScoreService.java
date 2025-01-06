@@ -48,18 +48,9 @@ public class ScoreService {
 
             Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
             if (isSaving.compareAndSet(false, true)) {
-                boolean isValidScore = saveScoreVO.getScore() > 0;
-                boolean scoreExists = scoreRepository.existsByUuidAndRoomId(saveScoreVO.getUuid(), findRoom.getId());
-
-                if (isValidScore) {
-                    if (scoreExists) {
-                        updatePlayerScore(saveScoreVO, findRoom);
-                    }
-                    if (!scoreExists) {
-                        savePlayerScore(saveScoreVO, findRoom);
-                    }
+                if (saveScoreVO.getScore() > 0) {
+                    saveScoreByExistsScore(saveScoreVO, findRoom);
                 }
-
                 isSaving.set(false);
             }
 
@@ -73,25 +64,27 @@ public class ScoreService {
 
     }
 
-    private void updatePlayerScore(SaveScoreVO saveScoreVO, Room findRoom) {
-        scoreRepository.updateScoreAndRound(
-                findRoom.getId(),
-                saveScoreVO.getUuid(),
-                saveScoreVO.getFinalRound(),
-                saveScoreVO.getScore()
-        );
+    private void saveScoreByExistsScore(SaveScoreVO saveScoreVO, Room findRoom) {
+        boolean scoreExists = scoreRepository.existsByUuidAndRoomId(saveScoreVO.getUuid(), findRoom.getId());
+        if (scoreExists) {
+            scoreRepository.updateScoreAndRound(
+                    findRoom.getId(),
+                    saveScoreVO.getUuid(),
+                    saveScoreVO.getFinalRound(),
+                    saveScoreVO.getScore()
+            );
+        } else {
+            scoreRepository.save(
+                    Score.builder()
+                            .score(saveScoreVO.getScore())
+                            .room(findRoom)
+                            .uuid(saveScoreVO.getUuid())
+                            .finalRound(saveScoreVO.getFinalRound())
+                            .build()
+            );
+        }
     }
 
-    private void savePlayerScore(SaveScoreVO saveScoreVO, Room findRoom) {
-        scoreRepository.save(
-                Score.builder()
-                        .score(saveScoreVO.getScore())
-                        .room(findRoom)
-                        .uuid(saveScoreVO.getUuid())
-                        .finalRound(saveScoreVO.getFinalRound())
-                        .build()
-        );
-    }
 
     @Transactional
     public List<ScoreResults> getGameScoreResults(Long roomId) throws NoExistRoomException, InterruptedException {
