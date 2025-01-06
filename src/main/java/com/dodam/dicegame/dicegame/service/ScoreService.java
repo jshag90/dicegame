@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class ScoreService {
 
+    public static final Map<Long, CountDownLatch> allSaveScoreLatchMap = new ConcurrentHashMap<>();
     private final RoomRepository roomRepository;
     private final ScoreRepository scoreRepository;
     private final PlayerRepository playerRepository;
@@ -40,7 +40,6 @@ public class ScoreService {
             3, 2
     );
     private final AtomicBoolean isSaving = new AtomicBoolean(false);
-    public static final Map<Long, CountDownLatch> allSaveScoreLatchMap = new ConcurrentHashMap<>();
 
     @Transactional
     public void saveScore(SaveScoreVO saveScoreVO) {
@@ -49,19 +48,16 @@ public class ScoreService {
 
             Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
             if (isSaving.compareAndSet(false, true)) {
-                if (!scoreRepository.existsByUuidAndRoomId(saveScoreVO.getUuid(), findRoom.getId()) && saveScoreVO.getScore() > 0) {
-                    scoreRepository.save(
-                            Score.builder()
-                                    .score(saveScoreVO.getScore())
-                                    .room(findRoom)
-                                    .uuid(saveScoreVO.getUuid())
-                                    .finalRound(saveScoreVO.getFinalRound())
-                                    .build()
-                    );
-                }
+                boolean isValidScore = saveScoreVO.getScore() > 0;
+                boolean scoreExists = scoreRepository.existsByUuidAndRoomId(saveScoreVO.getUuid(), findRoom.getId());
 
-                if (scoreRepository.existsByUuidAndRoomId(saveScoreVO.getUuid(), findRoom.getId()) && saveScoreVO.getScore() > 0) {
-                    scoreRepository.updateScoreAndRound(findRoom.getId(), saveScoreVO.getUuid(), saveScoreVO.getFinalRound(), saveScoreVO.getScore());
+                if (isValidScore) {
+                    if (scoreExists) {
+                        updatePlayerScore(saveScoreVO, findRoom);
+                    }
+                    if (!scoreExists) {
+                        savePlayerScore(saveScoreVO, findRoom);
+                    }
                 }
 
                 isSaving.set(false);
@@ -77,6 +73,26 @@ public class ScoreService {
 
     }
 
+    private void updatePlayerScore(SaveScoreVO saveScoreVO, Room findRoom) {
+        scoreRepository.updateScoreAndRound(
+                findRoom.getId(),
+                saveScoreVO.getUuid(),
+                saveScoreVO.getFinalRound(),
+                saveScoreVO.getScore()
+        );
+    }
+
+    private void savePlayerScore(SaveScoreVO saveScoreVO, Room findRoom) {
+        scoreRepository.save(
+                Score.builder()
+                        .score(saveScoreVO.getScore())
+                        .room(findRoom)
+                        .uuid(saveScoreVO.getUuid())
+                        .finalRound(saveScoreVO.getFinalRound())
+                        .build()
+        );
+    }
+
     @Transactional
     public List<ScoreResults> getGameScoreResults(Long roomId) throws NoExistRoomException, InterruptedException {
         Optional<Room> findRoom = roomRepository.findById(roomId);
@@ -89,11 +105,11 @@ public class ScoreService {
         List<ScoreResults> scoreResultsList = new ArrayList<>();
         for (Score score : scoreRepository.findByRoom(findRoom.get())) {
             ScoreResults scoreResults = ScoreResults.builder()
-                                                    .uuid(score.getUuid())
-                                                    .score(score.getScore())
-                                                    .roomId(roomId.intValue())
-                                                    .targetNumber(findRoom.get().getTargetNumber())
-                                                    .build();
+                    .uuid(score.getUuid())
+                    .score(score.getScore())
+                    .roomId(roomId.intValue())
+                    .targetNumber(findRoom.get().getTargetNumber())
+                    .build();
             scoreResultsList.add(scoreResults);
         }
 
@@ -116,7 +132,6 @@ public class ScoreService {
     }
 
     public List<Ranking> getRanking() {
-
         int limit = 10;
         List<Player> topTotalScoreUuid = playerRepository.findTopTotalScoreUuid(PageRequest.of(0, limit));
 
@@ -126,7 +141,7 @@ public class ScoreService {
             rankingList.add(Ranking.builder()
                     .rank(rank++)
                     .totalScore(player.getTotalScore())
-                    .uuid(player.getUuid().substring(0,8))
+                    .uuid(player.getUuid().substring(0, 8))
                     .build());
         }
         return rankingList;
