@@ -12,5 +12,4 @@ public class Ranking {
     Integer rank;
     Integer totalScore;
     String uuid;
-
 }

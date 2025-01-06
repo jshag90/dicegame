@@ -54,4 +54,14 @@ public class ScoreController {
                 .data(scoreService.getRanking())
                 .build());
     }
+
+    @GetMapping("/ranking/uuid={uuid}")
+    @Operation(summary = "특정 사용자의 순위를 조회", description = "특정 uuid 순위 조회")
+    public ResponseEntity<ReturnCodeVO<Ranking>> getPlayerRankingByUuid(@PathVariable("uuid") String uuid) {
+        log.info("/ranking/uuid={}", uuid);
+        return ResponseEntity.ok(ReturnCodeVO.<Ranking>builder()
+                .returnCode(ReturnCode.SUCCESS.getValue())
+                .data(scoreService.findPlayerRankingByUuid(uuid))
+                .build());
+    }
 }

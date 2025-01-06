@@ -14,6 +14,8 @@ import com.dodam.dicegame.dicegame.vo.SaveScoreVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +42,8 @@ public class ScoreService {
             3, 2
     );
     private final AtomicBoolean isSaving = new AtomicBoolean(false);
+
+    Sort totalScoreSort = Sort.by(Sort.Order.desc("totalScore"), Sort.Order.desc("id"));
 
     @Transactional
     public void saveScore(SaveScoreVO saveScoreVO) {
@@ -125,18 +129,40 @@ public class ScoreService {
     }
 
     public List<Ranking> getRanking() {
-        int limit = 10;
-        List<Player> topTotalScoreUuid = playerRepository.findTopTotalScoreUuid(PageRequest.of(0, limit));
 
+        int limit = 10;
+
+        Pageable pageable = PageRequest.of(0, limit, totalScoreSort);
+        List<Player> topTotalScoreUuid = playerRepository.findAll(pageable).getContent();
         List<Ranking> rankingList = new ArrayList<>();
         int rank = 1;
         for (Player player : topTotalScoreUuid) {
             rankingList.add(Ranking.builder()
                     .rank(rank++)
                     .totalScore(player.getTotalScore())
-                    .uuid(player.getUuid().substring(0, 8))
+                    .uuid(player.getUuid())
                     .build());
         }
+        log.info("rankingList : {}", rankingList);
         return rankingList;
+    }
+
+    public Ranking findPlayerRankingByUuid(String uuid) {
+        int rank = 0;
+        int totalScore = 0;
+
+        int rankIndex = 1;
+        for (Player player : playerRepository.findAll(totalScoreSort)) {
+            if (player.getUuid().equals(uuid)) {
+                rank = rankIndex;
+                totalScore = player.getTotalScore();
+                break;
+            }
+            rankIndex++;
+
+        }
+        Ranking ranking = Ranking.builder().rank(rank).totalScore(totalScore).uuid(uuid).build();
+        log.info(ranking.toString());
+        return ranking;
     }
 }
