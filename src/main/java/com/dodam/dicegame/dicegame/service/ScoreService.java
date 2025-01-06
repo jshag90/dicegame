@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @RequiredArgsConstructor
@@ -45,17 +46,21 @@ public class ScoreService {
 
     Sort totalScoreSort = Sort.by(Sort.Order.desc("totalScore"), Sort.Order.desc("id"));
 
+    private final ReentrantLock lock = new ReentrantLock();
     @Transactional
     public void saveScore(SaveScoreVO saveScoreVO) {
 
         if (roomRepository.findById(saveScoreVO.getRoomId()).isPresent()) {
 
             Room findRoom = roomRepository.findById(saveScoreVO.getRoomId()).get();
-            if (isSaveScore.compareAndSet(false, true)) {
+
+            lock.lock();
+            try {
                 if (saveScoreVO.getScore() > 0) {
                     saveScoreByExistsScore(saveScoreVO, findRoom);
                 }
-                isSaveScore.set(false);
+            } finally {
+                lock.unlock();
             }
 
             allSaveScoreLatchMap.putIfAbsent(saveScoreVO.getRoomId(), new CountDownLatch(1));
