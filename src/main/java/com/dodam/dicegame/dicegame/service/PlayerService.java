@@ -1,5 +1,6 @@
 package com.dodam.dicegame.dicegame.service;
 
+import com.dodam.dicegame.dicegame.dto.PlayerInfo;
 import com.dodam.dicegame.dicegame.entity.Player;
 import com.dodam.dicegame.dicegame.entity.Room;
 import com.dodam.dicegame.dicegame.exception.SameAlreadyNickNamePlayerException;
@@ -50,8 +51,15 @@ public class PlayerService {
         }
     }
 
-    public Player getPlayerInfoByUuid(String uuid){
-        return playerRepository.findByUuid(uuid);
+    public PlayerInfo getPlayerInfoByUuid(String uuid){
+        Player player = playerRepository.findByUuid(uuid);
+        Long roomId = player.getRoom() == null ? -1L : player.getRoom().getId();
+        return PlayerInfo.builder().uuid(player.getUuid())
+                .createdAt(player.getCreatedAt())
+                .isManager(player.getIsManager())
+                .roomId(roomId)
+                .totalScore(player.getTotalScore())
+                .build();
     }
 
 }
