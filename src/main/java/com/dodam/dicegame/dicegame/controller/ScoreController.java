@@ -35,13 +35,15 @@ public class ScoreController {
                 .build());
     }
 
-    @GetMapping("/results/room-id={roomId}")
+    @GetMapping("/results/room-id={roomId}/uuid={uuid}")
     @Operation(summary = "게임 결과 조회", description = "플레이어 게임 결과 순위 조회")
-    public ResponseEntity<ReturnCodeVO<List<ScoreResults>>> getGameScoreResults(@PathVariable("roomId") Long roomId) throws NoExistRoomException, InterruptedException {
+    public ResponseEntity<ReturnCodeVO<List<ScoreResults>>> getGameScoreResults(@PathVariable("roomId") Long roomId
+    , @PathVariable("uuid") String uuid
+    ) throws NoExistRoomException, InterruptedException {
         log.info("/results/room-id {}", roomId);
         return ResponseEntity.ok(ReturnCodeVO.<List<ScoreResults>>builder()
                 .returnCode(ReturnCode.SUCCESS.getValue())
-                .data(scoreService.getGameScoreResults(roomId))
+                .data(scoreService.getGameScoreResults(roomId, uuid))
                 .build());
     }
 

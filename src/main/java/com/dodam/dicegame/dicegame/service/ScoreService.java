@@ -96,7 +96,7 @@ public class ScoreService {
 
 
     @Transactional
-    public List<ScoreResults> getGameScoreResults(Long roomId) throws NoExistRoomException, InterruptedException {
+    public List<ScoreResults> getGameScoreResults(Long roomId, String uuid) throws NoExistRoomException, InterruptedException {
         Optional<Room> findRoom = roomRepository.findById(roomId);
         if (findRoom.isEmpty()) {
             throw new NoExistRoomException("해당 roomId가 존재하지 않음 : " + roomId);
@@ -124,8 +124,9 @@ public class ScoreService {
             int plusScore = rankToScoreMap.getOrDefault(rank, -1);
             scoreResult.setRank(rank);
             scoreResult.setPlusTotalScore(plusScore);
-
-            playerRepository.incrementTotalScoreByUuid(scoreResult.getUuid(), plusScore);
+            if (uuid.equals(scoreResult.getUuid())) {
+                playerRepository.incrementTotalScoreByUuid(uuid, plusScore);
+            }
             rank++;
         }
 
