@@ -79,7 +79,8 @@ public class RoomService {
      * @throws NoExistRoomException
      */
     public Room checkJoinPublicRoomPlayer() throws NoExistRoomException {
-        return roomRepository.findAvailableMaxPlayerPublicRoom(RoomType.PUBLIC.getValue(), PageRequest.of(0, 1))
+        LocalDateTime thirtyMinutesAgo = LocalDateTime.now().minusMinutes(30);
+        return roomRepository.findAvailableMaxPlayerPublicRoom(RoomType.PUBLIC.getValue(), thirtyMinutesAgo, PageRequest.of(0, 1))
                 .orElseThrow(() -> new NoExistRoomException("공개방이 존재하지 않습니다."));
     }
 
