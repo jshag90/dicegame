@@ -42,7 +42,6 @@ public class ScoreService {
             2, 3,
             3, 2
     );
-    private final AtomicBoolean isSaveScore = new AtomicBoolean(false);
 
     Sort totalScoreSort = Sort.by(Sort.Order.desc("totalScore"), Sort.Order.desc("id"));
 
@@ -124,9 +123,11 @@ public class ScoreService {
             int plusScore = rankToScoreMap.getOrDefault(rank, -1);
             scoreResult.setRank(rank);
             scoreResult.setPlusTotalScore(plusScore);
+
             if (uuid.equals(scoreResult.getUuid())) {
                 playerRepository.incrementTotalScoreByUuid(uuid, plusScore);
             }
+
             rank++;
         }
 
