@@ -56,6 +56,7 @@ public class PlayerService {
         Optional<Player> player = playerRepository.findByUuid(uuid);
         if(player.isEmpty()){
             log.info("등록 되지 않은 uuid : {}", uuid);
+            savePlayerUuid(uuid);
         }
         Long roomId = player.get().getRoom() == null ? -1L : player.get().getRoom().getId();
         return PlayerInfo.builder().uuid(player.get().getUuid())
