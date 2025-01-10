@@ -41,11 +41,18 @@ public interface BroadcastByActionType {
                 return;
             }
 
+            if(!session.isOpen()){
+                return;
+            }
+
             try {
                 session.sendMessage(new TextMessage(message));
+            } catch (IllegalStateException e) {
+                // 세션이 닫혀 메시지 전송이 실패한 경우
+                log.info("Failed to send message because session " + sessionId + " is closed for room " + roomId, e);
             } catch (IOException e) {
-                log.info("Failed to send message to session " + sessionId + " in room " + roomId);
-                e.printStackTrace();
+                // 기타 메시지 전송 실패 처리
+                log.info("Failed to send message to session " + sessionId + " in room " + roomId, e);
             }
         });
     }

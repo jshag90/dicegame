@@ -25,11 +25,17 @@ public class WebSocketRoomService {
         roomIdSessionIdMap.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
         sessionIdUuidMap.computeIfAbsent(sessionId, k -> ConcurrentHashMap.newKeySet()).add(uuid);
         sessionMap.put(sessionId, session);
+        log.info("addSessionToRoom() :  {}",roomIdSessionIdMap);
     }
 
-    public String getUuidBySessionId(String sessionId){
-        return Optional.ofNullable(sessionIdUuidMap.get(sessionId)).orElse(Collections.emptySet()).toString();
+    public String getUuidBySessionId(String sessionId) {
+        return Optional.ofNullable(sessionIdUuidMap.get(sessionId))
+                .orElse(Collections.emptySet())
+                .stream()
+                .findFirst() // 첫 번째 값 가져오기
+                .orElse(""); // 값이 없으면 빈 문자열 반환
     }
+
 
     public WebSocketSession getSessionById(String sessionId) {
         log.info("getSessionById() : {}", sessionId);
@@ -47,6 +53,7 @@ public class WebSocketRoomService {
 
     public String getRoomIdBySessionId(String sessionId) {
         log.info("getRoomIdBySessionId() {}", sessionId);
+        log.info("getRoomIdBySessionId() {}", roomIdSessionIdMap);
         return roomIdSessionIdMap.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().contains(sessionId))
