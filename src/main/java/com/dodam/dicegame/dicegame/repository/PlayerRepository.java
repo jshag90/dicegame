@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
@@ -55,6 +56,6 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Modifying
     void incrementTotalScoreByUuid(@Param("uuid") String uuid, @Param("plusScore") int plusScore);
 
-    Player findByUuid(String uuid);
+    Optional<Player> findByUuid(String uuid);
 
 }

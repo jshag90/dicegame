@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -52,13 +53,16 @@ public class PlayerService {
     }
 
     public PlayerInfo getPlayerInfoByUuid(String uuid){
-        Player player = playerRepository.findByUuid(uuid);
-        Long roomId = player.getRoom() == null ? -1L : player.getRoom().getId();
-        return PlayerInfo.builder().uuid(player.getUuid())
-                .createdAt(player.getCreatedAt())
-                .isManager(player.getIsManager())
+        Optional<Player> player = playerRepository.findByUuid(uuid);
+        if(player.isEmpty()){
+            log.info("등록 되지 않은 uuid : {}", uuid);
+        }
+        Long roomId = player.get().getRoom() == null ? -1L : player.get().getRoom().getId();
+        return PlayerInfo.builder().uuid(player.get().getUuid())
+                .createdAt(player.get().getCreatedAt())
+                .isManager(player.get().getIsManager())
                 .roomId(roomId)
-                .totalScore(player.getTotalScore())
+                .totalScore(player.get().getTotalScore())
                 .build();
     }
 
