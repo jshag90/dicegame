@@ -27,7 +27,6 @@ public class CreateGameRoomAction implements BroadcastByActionType {
 
     @Override
     public void broadcastToClient(WebSocketSession session, SocketPayloadVO socketPayloadVO) {
-        log.info("TTTTTTTTTTTTTTTTTTTTTTT{}", session.getId());
         webSocketRoomService.addSessionToRoom(socketPayloadVO.getRoomId(), session.getId(), socketPayloadVO.getUuid(), session);
         ResponseSocketPayloadVO responseSocketPayloadVO = ResponseSocketPayloadVO.builder()
                 .action(socketPayloadVO.getAction())

@@ -44,8 +44,6 @@ public class LeaveRoomAction implements BroadcastByActionType{
         String message="",subMessage="";
         List<Long> otherNickNamePlayerIds = playerRepository.findIdByRoomIdAndNotUuid(Long.valueOf(socketPayloadVO.getRoomId()), socketPayloadVO.getUuid());
 
-        webSocketRoomService.removeSessionById(session.getId());
-
         Room findRoom = roomRepository.findById(Long.valueOf(socketPayloadVO.getRoomId())).get();
         if(findRoom.getIsGameStarted().equals("N") && otherNickNamePlayerIds.size() > 0){
 
