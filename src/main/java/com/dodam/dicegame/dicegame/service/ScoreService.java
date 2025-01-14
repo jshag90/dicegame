@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,9 +56,7 @@ public class ScoreService {
 
             lock.lock();
             try {
-                if (saveScoreVO.getScore() > 0) {
-                    saveScoreByExistsScore(saveScoreVO, findRoom);
-                }
+                saveScoreByExistsScore(saveScoreVO, findRoom);
             } finally {
                 lock.unlock();
             }
@@ -114,6 +113,9 @@ public class ScoreService {
             scoreResultsList.add(scoreResults);
         }
 
+        List<ScoreResults> zeroScoreList = scoreResultsList.stream().filter(scoreResults -> scoreResults.getScore().equals(0)).toList();
+        boolean isAllPlayerZeroScore = zeroScoreList.size() == scoreResultsList.size();
+
         // 정렬 및 순위 설정
         DataUtil.sortScoreResults(scoreResultsList);
 
@@ -121,6 +123,8 @@ public class ScoreService {
         int rank = 1;
         for (ScoreResults scoreResult : scoreResultsList) {
             int plusScore = rankToScoreMap.getOrDefault(rank, -1);
+            plusScore = isAllPlayerZeroScore ? 0 : plusScore;
+
             scoreResult.setRank(rank);
             scoreResult.setPlusTotalScore(plusScore);
 
